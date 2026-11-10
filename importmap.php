@@ -36,4 +36,9 @@ return [
     'gsap/SplitText' => ['version' => '3.15.1'],
     'gsap/DrawSVGPlugin' => ['version' => '3.15.1'],
     'gsap/MotionPathPlugin' => ['version' => '3.15.1'],
+    'three' => ['version' => '0.187.0'],
+    'three/examples/jsm/geometries/RoundedBoxGeometry.js' => ['version' => '0.187.0'],
+    'three/examples/jsm/environments/RoomEnvironment.js' => ['version' => '0.187.0'],
+    'lenis' => ['version' => '1.3.27'],
+    'lenis/dist/lenis.css' => ['version' => '1.3.27', 'type' => 'css'],
 ];

@@ -1,5 +1,6 @@
-{# Fer à cheval de la charte : contour fin et six clous. viewBox 100 × 110, base de l'arc sur y = 108. #}
-<svg class="{{ class|default('shoe') }}" viewBox="0 0 100 112" aria-hidden="true" focusable="false">
+{# Fer à cheval de la charte : contour fin et six clous.
+   La viewBox est recadrée sur l'encre (trait compris) : la hauteur CSS du SVG est exactement celle du dessin. #}
+<svg class="{{ class|default('shoe') }}" viewBox="2 2.5 96 105" aria-hidden="true" focusable="false">
     <path class="shoe-outline" d="M7 5 H29 V62 A21 21 0 0 0 71 62 V5 H93 V62 A43 43 0 0 1 7 62 Z" fill="none" stroke="currentColor" stroke-width="{{ stroke ?? 5 }}" stroke-linejoin="round"/>
     <g class="shoe-nails" fill="currentColor">
         <circle cx="18" cy="22" r="4.6"/><circle cx="18" cy="41" r="4.6"/>

@@ -31,7 +31,7 @@
             {% for horse in horses %}
                 {% set reading = latest[horse.id] ?? null %}
                 {% set alertsCount = openAlertsByHorse[horse.id] ?? 0 %}
-                <a class="card horse-card" href="{{ path('app_horse_show', {id: horse.id}) }}" data-reveal>
+                <a class="card horse-card" href="{{ path('app_horse_show', {id: horse.id}) }}" data-reveal data-controller="tilt">
                     <header>
                         <div>
                             <h3>{{ horse.name }}</h3>
