@@ -55,9 +55,12 @@
 
         <footer class="site-footer">
             <div class="container">
-                {{ include('_partials/_wordmark.html.twig') }}
-                <em>Parce que son bien-être ne prend jamais de pause.</em>
-                <span>Projet de fin d'études · {{ 'now'|date('Y') }}</span>
+                <div class="footer-brand">
+                    {{ include('_partials/_wordmark.html.twig') }}
+                    <em>Parce que son bien-être ne prend jamais de pause.</em>
+                </div>
+                {{ include('_partials/_socials.html.twig') }}
+                <span class="footer-meta">Projet de fin d'études · {{ 'now'|date('Y') }}</span>
             </div>
         </footer>
     </body>

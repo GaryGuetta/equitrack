@@ -176,7 +176,7 @@
     <div class="marquee" data-controller="marquee" aria-hidden="true">
         <div class="marquee-track" data-marquee-target="track">
             {% for word in ['Position', 'Allures', 'Roulades', 'Climat sous la couverture', 'Sortie d\'enclos', 'Conseil de couverture', 'Alertes'] %}
-                <span>{{ word }}</span>{{ include('_partials/_horseshoe.html.twig', {class: 'marquee-shoe', stroke: 6}) }}
+                <span>{{ word }}</span>{{ include('_partials/_horseshoe.html.twig', {class: 'marquee-shoe', stroke: 5}) }}
             {% endfor %}
         </div>
     </div>
@@ -244,8 +244,12 @@
             <h2>Equitrack alerte, il ne diagnostique pas</h2>
             <p>Au moindre doute sur la santé de votre cheval, appelez votre vétérinaire.<br>L'historique d'Equitrack peut l'aider dans son examen.</p>
             {% if not app.user %}
-                <a class="btn btn-primary" href="{{ path('app_register') }}">Commencer le suivi <span class="arrow" aria-hidden="true">→</span></a>
+                <a class="btn btn-primary" data-controller="magnetic" href="{{ path('app_register') }}">Commencer le suivi <span class="arrow" aria-hidden="true">→</span></a>
             {% endif %}
+            <div class="cta-contact">
+                <p class="eyebrow">Une question, un essai dans votre écurie&nbsp;?</p>
+                {{ include('_partials/_socials.html.twig', {class: 'socials-light'}) }}
+            </div>
         </div>
     </section>
 {% endblock %}
