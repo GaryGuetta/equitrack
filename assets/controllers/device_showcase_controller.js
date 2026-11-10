@@ -213,10 +213,33 @@ export default class extends Controller {
         }
         this.activeChapter = index;
         this.chapterTargets.forEach((chapter, i) => chapter.classList.toggle('is-active', i === index));
-        this.dotTargets.forEach((dot, i) => dot.classList.toggle('is-active', i === index));
+        this.dotTargets.forEach((dot, i) => {
+            dot.classList.toggle('is-active', i === index);
+            dot.toggleAttribute('aria-current', i === index);
+        });
         const chapter = this.chapterTargets[index];
         this.hotspotKey = chapter?.dataset.anchor ?? null;
         this.hotspotLabelTarget.textContent = chapter?.dataset.hotspot ?? '';
+    }
+
+    /** Clic sur un intitulé : on fait défiler jusqu'au milieu de ce chapitre. */
+    goTo({ params: { index } }) {
+        const trigger = this.timeline?.scrollTrigger;
+        if (!trigger) {
+            return;
+        }
+        const chapters = this.chapterTargets.length;
+        // Le chapitre i occupe l'intervalle [i, i + 1) de la timeline ; on vise juste après son début,
+        // quand ses animations sont jouées.
+        const target = trigger.start + (trigger.end - trigger.start) * ((index + 0.6) / chapters);
+        const distance = Math.abs(target - window.scrollY);
+        const duration = reduceMotion() ? 0 : Math.min(2.4, 0.8 + distance / 2500);
+
+        if (window.lenis) {
+            window.lenis.scrollTo(target, { duration, easing: (t) => 1 - (1 - t) ** 4 });
+        } else {
+            window.scrollTo({ top: target, behavior: duration ? 'smooth' : 'auto' });
+        }
     }
 
     // ---------------------------------------------------------------- rendu

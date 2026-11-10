@@ -138,12 +138,16 @@
                 {% endfor %}
             </div>
 
-            <div class="container showcase-nav" aria-hidden="true">
+            <nav class="container showcase-nav" aria-label="Chapitres du boîtier">
                 <ol class="showcase-dots">
-                    {% for chapter in chapters %}<li data-device-showcase-target="dot">{{ chapter.kicker }}</li>{% endfor %}
+                    {% for chapter in chapters %}
+                        <li>
+                            <button type="button" data-device-showcase-target="dot" data-action="device-showcase#goTo" data-device-showcase-index-param="{{ loop.index0 }}">{{ chapter.kicker }}</button>
+                        </li>
+                    {% endfor %}
                 </ol>
-                <div class="showcase-progress"><span data-device-showcase-target="progress"></span></div>
-            </div>
+                <div class="showcase-progress" aria-hidden="true"><span data-device-showcase-target="progress"></span></div>
+            </nav>
         </div>
     </section>
 
