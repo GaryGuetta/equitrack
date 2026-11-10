@@ -1,9 +1,10 @@
 import { Controller } from '@hotwired/stimulus';
 import L from 'leaflet';
 import { COLORS, createMap, paddockLayer } from '../leaflet_helpers.js';
+import { reduceMotion } from '../motion.js';
 
 /*
- * Carte de la fiche cheval : enclos, trajet du jour et position actuelle (F2, F4).
+ * Carte de la fiche cheval : enclos, trajet du jour (qui se dessine) et position actuelle (F2, F4).
  */
 export default class extends Controller {
     static values = {
@@ -24,25 +25,18 @@ export default class extends Controller {
         }
 
         if (this.trackValue.length > 1) {
-            const track = L.polyline(this.trackValue, {
-                color: COLORS.forest,
-                weight: 2,
-                opacity: 0.6,
-                lineJoin: 'round',
-            }).addTo(this.map);
-            bounds.extend(track.getBounds());
+            bounds.extend(L.latLngBounds(this.trackValue));
+            this.drawTrack();
         }
 
         if (this.currentValue.length === 2) {
-            const color = this.outsideValue ? COLORS.critical : COLORS.forest;
-            L.circleMarker(this.currentValue, {
-                radius: 9,
-                color,
-                weight: 4,
-                fillColor: '#fff',
-                fillOpacity: 1,
-            })
-                .bindTooltip(this.nameValue || 'Position actuelle', { direction: 'top', offset: [0, -8] })
+            const icon = L.divIcon({
+                className: `pulse-marker${this.outsideValue ? ' is-out' : ''}`,
+                html: '<span></span>',
+                iconSize: [20, 20],
+            });
+            L.marker(this.currentValue, { icon, keyboard: false })
+                .bindTooltip(this.nameValue || 'Position actuelle', { direction: 'top', offset: [0, -12] })
                 .addTo(this.map);
             bounds.extend(this.currentValue);
         }
@@ -55,6 +49,36 @@ export default class extends Controller {
     }
 
     disconnect() {
+        cancelAnimationFrame(this.frame);
         this.map?.remove();
+    }
+
+    /** Le trajet se trace point par point en 2,5 s, comme une rediffusion de la journée. */
+    drawTrack() {
+        const line = L.polyline([], {
+            color: COLORS.forest,
+            weight: 2,
+            opacity: 0.6,
+            lineJoin: 'round',
+        }).addTo(this.map);
+
+        if (reduceMotion()) {
+            line.setLatLngs(this.trackValue);
+            return;
+        }
+
+        const points = this.trackValue;
+        const duration = 2500;
+        let start = null;
+        const step = (time) => {
+            start ??= time;
+            const progress = Math.min(1, (time - start) / duration);
+            const eased = 1 - (1 - progress) ** 3;
+            line.setLatLngs(points.slice(0, Math.max(2, Math.round(eased * points.length))));
+            if (progress < 1) {
+                this.frame = requestAnimationFrame(step);
+            }
+        };
+        this.frame = requestAnimationFrame(step);
     }
 }

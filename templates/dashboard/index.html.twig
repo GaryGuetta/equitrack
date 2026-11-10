@@ -18,7 +18,7 @@
         </div>
 
         {% if openAlerts is not empty %}
-            <section class="card" style="margin-bottom:24px">
+            <section class="card" style="margin-bottom:24px" data-reveal>
                 <div class="card-head">
                     <h2>À traiter</h2>
                     <a href="{{ path('app_alert_index') }}">Toutes les alertes</a>
@@ -31,7 +31,7 @@
             {% for horse in horses %}
                 {% set reading = latest[horse.id] ?? null %}
                 {% set alertsCount = openAlertsByHorse[horse.id] ?? 0 %}
-                <a class="card horse-card" href="{{ path('app_horse_show', {id: horse.id}) }}">
+                <a class="card horse-card" href="{{ path('app_horse_show', {id: horse.id}) }}" data-reveal>
                     <header>
                         <div>
                             <h3>{{ horse.name }}</h3>
@@ -56,11 +56,19 @@
                             </div>
                             <div class="stat">
                                 <span class="stat-label">Couverture</span>
-                                <span class="stat-value">{{ reading.temperature is not null ? reading.temperature|number_format(1, ',') : '—' }}<small>°C</small></span>
+                                <span class="stat-value">
+                                    {%- if reading.temperature is not null -%}
+                                        <span data-count="{{ reading.temperature }}" data-decimals="1">{{ reading.temperature|number_format(1, ',') }}</span>
+                                    {%- else %}—{% endif %}<small>°C</small>
+                                </span>
                             </div>
                             <div class="stat">
                                 <span class="stat-label">Humidité</span>
-                                <span class="stat-value">{{ reading.humidity is not null ? reading.humidity|round : '—' }}<small>%</small></span>
+                                <span class="stat-value">
+                                    {%- if reading.humidity is not null -%}
+                                        <span data-count="{{ reading.humidity|round }}">{{ reading.humidity|round }}</span>
+                                    {%- else %}—{% endif %}<small>%</small>
+                                </span>
                             </div>
                         </div>
                         <footer>
@@ -75,7 +83,7 @@
                 </a>
             {% endfor %}
 
-            <a class="card add-card" href="{{ path('app_horse_new') }}">
+            <a class="card add-card" href="{{ path('app_horse_new') }}" data-reveal>
                 <div>
                     <div class="plus">+</div>
                     <strong>Ajouter un cheval</strong>

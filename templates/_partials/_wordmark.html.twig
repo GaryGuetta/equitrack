@@ -1,4 +1,8 @@
-{# Logo : le « u » d'Equitrack est un fer à cheval, à la hauteur des minuscules. #}
-<a href="{{ path(app.user ? 'app_dashboard' : 'app_home') }}" class="wordmark{{ class|default('') ? ' ' ~ class : '' }}" aria-label="Equitrack, accueil">
-    Eq<svg class="shoe" viewBox="0 0 28 34" aria-hidden="true"><path d="M5 2v16a9 9 0 0 0 18 0V2" fill="none" stroke="currentColor" stroke-width="5"/><g fill="{{ holes|default('var(--cream)') }}"><circle cx="5" cy="6" r="1.1"/><circle cx="5" cy="11.5" r="1.1"/><circle cx="23" cy="6" r="1.1"/><circle cx="23" cy="11.5" r="1.1"/><circle cx="9" cy="24" r="1.1"/><circle cx="19" cy="24" r="1.1"/></g></svg>itrack
-</a>
+{# Logo : le « u » d'Equitrack est un fer à cheval dessiné au trait, posé sur la ligne de base, à la hauteur des minuscules.
+   Variables : class (classes en plus), link (false pour un logo non cliquable), attrs (attributs bruts, ex. contrôleur Stimulus) #}
+{% set tag = (link ?? true) ? 'a' : 'div' %}
+<{{ tag }} class="wordmark {{ class ?? '' }}"{% if tag == 'a' %} href="{{ path(app.user ? 'app_dashboard' : 'app_home') }}"{% endif %} aria-label="Equitrack" {{ (attrs ?? '')|raw }}>
+    <span class="wm-part" aria-hidden="true">Eq</span>
+    {{- include('_partials/_horseshoe.html.twig', {class: 'shoe'}) -}}
+    <span class="wm-part" aria-hidden="true">itrack</span>
+</{{ tag }}>

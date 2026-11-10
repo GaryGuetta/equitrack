@@ -1,5 +1,6 @@
 import { Controller } from '@hotwired/stimulus';
 import { Chart, registerables } from 'chart.js';
+import { reduceMotion } from '../motion.js';
 
 Chart.register(...registerables);
 Chart.defaults.font.family = "'Outfit', system-ui, sans-serif";
@@ -15,6 +16,25 @@ const DATASETS = {
         { key: 'activity', label: 'Activité (0–100)', color: '#1E3A2F', axis: 'y', fill: true },
     ],
 };
+
+/** Les courbes se déroulent de gauche à droite (exemple « progressive line » de Chart.js). */
+function progressiveLine(totalDuration = 1400) {
+    const delay = (flag) => (ctx) => {
+        if (ctx.type !== 'data' || ctx[flag]) {
+            return 0;
+        }
+        ctx[flag] = true;
+        return ctx.index * (totalDuration / ctx.chart.data.labels.length);
+    };
+    const previousY = (ctx) => (ctx.index === 0
+        ? ctx.chart.scales.y.getPixelForValue(0)
+        : ctx.chart.getDatasetMeta(ctx.datasetIndex).data[ctx.index - 1].getProps(['y'], true).y);
+
+    return {
+        x: { type: 'number', easing: 'linear', duration: totalDuration / 10, from: NaN, delay: delay('xStarted') },
+        y: { type: 'number', easing: 'linear', duration: totalDuration / 10, from: previousY, delay: delay('yStarted') },
+    };
+}
 
 /*
  * Courbes de la fiche cheval : climat sous la couverture et activité (F6).
@@ -48,6 +68,7 @@ export default class extends Controller {
             },
             options: {
                 maintainAspectRatio: false,
+                animation: reduceMotion() ? false : progressiveLine(),
                 interaction: { mode: 'index', intersect: false },
                 plugins: {
                     legend: { position: 'bottom', labels: { boxWidth: 12, boxHeight: 2, usePointStyle: false } },

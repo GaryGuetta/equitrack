@@ -23,7 +23,7 @@
 
         {# --- Indicateurs du jour --- #}
         <div class="grid grid-4" style="margin-bottom:20px">
-            <div class="card stat">
+            <div class="card stat" data-reveal>
                 <span class="stat-label">Position</span>
                 {% if insidePaddock is same as(false) %}
                     <span class="stat-value" style="color:var(--critical)">Hors enclos</span>
@@ -34,17 +34,17 @@
                 {% endif %}
                 <span class="stat-sub">{{ latest ? 'Relevée ' ~ latest.recordedAt|ago : 'Aucune mesure' }}</span>
             </div>
-            <div class="card stat">
+            <div class="card stat" data-reveal>
                 <span class="stat-label">Distance aujourd'hui</span>
-                <span class="stat-value">{{ (summary.distanceMeters / 1000)|number_format(1, ',') }}<small>km</small></span>
+                <span class="stat-value"><span data-count="{{ (summary.distanceMeters / 1000)|round(1) }}" data-decimals="1">{{ (summary.distanceMeters / 1000)|number_format(1, ',') }}</span><small>km</small></span>
                 <span class="stat-sub">depuis minuit</span>
             </div>
-            <div class="card stat">
+            <div class="card stat" data-reveal>
                 <span class="stat-label">En mouvement</span>
                 <span class="stat-value">{{ summary.movingMinutes|duration }}</span>
                 <span class="stat-sub">{{ summary.rolls }} roulade{{ summary.rolls > 1 ? 's' }} aujourd'hui</span>
             </div>
-            <div class="card stat">
+            <div class="card stat" data-reveal>
                 <span class="stat-label">Sous la couverture</span>
                 <span class="stat-value">
                     {{- latest and latest.temperature is not null ? latest.temperature|number_format(1, ',') : '—' }}<small>°C</small>
@@ -58,7 +58,7 @@
 
         <div class="grid grid-main">
             <div class="stack">
-                <section class="card card-flush">
+                <section data-reveal class="card card-flush">
                     <div
                         class="map"
                         data-controller="horse-map"
@@ -80,7 +80,7 @@
                     </div>
                 </section>
 
-                <section class="card">
+                <section data-reveal class="card">
                     <div class="card-head">
                         <h2>Climat sous la couverture</h2>
                         <nav class="tabs" aria-label="Période">
@@ -98,7 +98,7 @@
                     {% endif %}
                 </section>
 
-                <section class="card">
+                <section data-reveal class="card">
                     <div class="card-head">
                         <h2>Activité</h2>
                         <span class="muted">sur {{ periods[periode].label }}</span>
@@ -115,7 +115,7 @@
 
             <aside class="stack">
                 {# --- Conseil de couverture (F7) --- #}
-                <section class="card advice">
+                <section data-reveal class="card advice">
                     <p class="eyebrow">Conseil de couverture</p>
                     {% if advice %}
                         <p class="advice-main">{{ advice.recommended.label }}</p>
@@ -135,14 +135,14 @@
                 </section>
 
                 {# --- Allures du jour (F3) --- #}
-                <section class="card">
+                <section data-reveal class="card">
                     <div class="card-head">
                         <h3>Allures aujourd'hui</h3>
                         <span class="muted">{{ summary.readingCount }} mesures</span>
                     </div>
                     {% set totalMinutes = summary.minutesByGait|reduce((sum, m) => sum + m, 0) %}
                     {% if totalMinutes > 0 %}
-                        <div class="gait-bar" role="img" aria-label="Répartition des allures">
+                        <div class="gait-bar" data-grow role="img" aria-label="Répartition des allures">
                             {% for gait, minutes in summary.minutesByGait %}
                                 {% if minutes > 0 %}<span class="g-{{ gait }}" style="width: {{ (minutes / totalMinutes * 100)|round(2) }}%"></span>{% endif %}
                             {% endfor %}
@@ -158,7 +158,7 @@
                 </section>
 
                 {# --- Alertes --- #}
-                <section class="card">
+                <section data-reveal class="card">
                     <div class="card-head">
                         <h3>Dernières alertes</h3>
                         <a href="{{ path('app_alert_index', {filtre: 'toutes'}) }}">Historique</a>
@@ -167,7 +167,7 @@
                 </section>
 
                 {# --- Boîtier --- #}
-                <section class="card" id="boitier">
+                <section data-reveal class="card" id="boitier">
                     <h3>Boîtier</h3>
                     {% for token in app.flashes('device_token') %}
                         <div class="token-box" role="alert">

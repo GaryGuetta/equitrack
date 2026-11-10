@@ -6,6 +6,9 @@
         <title>{% block title %}Suivi connecté du cheval{% endblock %} · Equitrack</title>
         <meta name="description" content="{% block description %}Equitrack suit votre cheval 24 h/24 : position, activité, température sous la couverture, alertes et conseil de couverture.{% endblock %}">
         <meta name="theme-color" content="#1E3A2F">
+        <meta name="view-transition" content="same-origin">
+        {# Masque les éléments à révéler avant le premier rendu, sauf si l'utilisateur a demandé moins d'animations. #}
+        <script>if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('motion');</script>
         <link rel="icon" href="{{ asset('images/favicon.svg') }}" type="image/svg+xml">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,7 +21,7 @@
     </head>
     <body>
         {% set route = app.current_route %}
-        <header class="site-header">
+        <header class="site-header" data-controller="header">
             <div class="container">
                 {{ include('_partials/_wordmark.html.twig') }}
                 <nav class="nav" aria-label="Navigation principale">
@@ -38,12 +41,12 @@
             </div>
         </header>
 
-        <main>
+        <main data-controller="reveal">
             {% set flashes = app.flashes(['success', 'error']) %}
             {% if flashes.success is not empty or flashes.error is not empty %}
                 <div class="container flashes" role="status">
-                    {% for message in flashes.success %}<div class="flash">{{ message }}</div>{% endfor %}
-                    {% for message in flashes.error %}<div class="flash flash-error">{{ message }}</div>{% endfor %}
+                    {% for message in flashes.success %}<div class="flash" data-controller="flash">{{ message }}<button type="button" class="flash-close" data-action="flash#close" aria-label="Fermer">×</button></div>{% endfor %}
+                    {% for message in flashes.error %}<div class="flash flash-error" data-controller="flash">{{ message }}<button type="button" class="flash-close" data-action="flash#close" aria-label="Fermer">×</button></div>{% endfor %}
                 </div>
             {% endif %}
 
@@ -52,7 +55,7 @@
 
         <footer class="site-footer">
             <div class="container">
-                {{ include('_partials/_wordmark.html.twig', {holes: 'var(--forest)'}) }}
+                {{ include('_partials/_wordmark.html.twig') }}
                 <em>Parce que son bien-être ne prend jamais de pause.</em>
                 <span>Projet de fin d'études · {{ 'now'|date('Y') }}</span>
             </div>

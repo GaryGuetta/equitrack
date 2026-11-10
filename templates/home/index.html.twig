@@ -10,37 +10,127 @@
         {%- elseif name == 'fence' -%}<path d="M4 20V7l2-3 2 3v13M16 20V7l2-3 2 3v13M8 10h8M8 16h8"/>
         {%- elseif name == 'bell' -%}<path d="M6 16V11a6 6 0 1 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/>
         {%- elseif name == 'blanket' -%}<path d="M4 7c3-2 13-2 16 0v10c-3 2-13 2-16 0z"/><path d="M8 6v12M16 6v12"/>
+        {%- elseif name == 'chip' -%}<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>
+        {%- elseif name == 'signal' -%}<path d="M12 20v-6"/><path class="wave w1" d="M8.5 10.5a5 5 0 0 1 7 0"/><path class="wave w2" d="M5.5 7.5a9 9 0 0 1 13 0"/><circle cx="12" cy="14" r="1.2" fill="currentColor"/>
+        {%- elseif name == 'spark' -%}<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/>
         {%- endif -%}
     </svg>
 {% endmacro %}
 
 {% block body %}
-    <section class="hero">
+    {# ---------- Accueil ---------- #}
+    <section class="hero" data-controller="hero">
+        <div class="hero-glow" aria-hidden="true"></div>
         <div class="container">
-            <p class="eyebrow">Boîtier connecté pour cheval</p>
+            <p class="eyebrow" data-hero-target="fade">Boîtier connecté pour cheval</p>
             <h1 class="visually-hidden">Equitrack</h1>
-            {{ include('_partials/_wordmark.html.twig') }}
-            <hr class="rule">
-            <p class="slogan">Parce que son bien-être<br>ne prend jamais de pause.</p>
-            <p class="lead">
+            {{ include('_partials/_wordmark.html.twig', {link: false, class: 'wordmark-hero', attrs: 'data-controller="logo"'}) }}
+            <hr class="rule" data-hero-target="fade">
+            <p class="slogan" data-hero-target="slogan">Parce que son bien-être<br>ne prend jamais de pause.</p>
+            <p class="lead" data-hero-target="fade">
                 Un boîtier glissé dans la couverture suit votre cheval jour et nuit : où il est, comment il bouge,
                 s'il a trop chaud ou trop froid. Equitrack interprète ces mesures, vous alerte au moindre signal
                 inhabituel et vous conseille la bonne couverture.
             </p>
-            <div class="actions">
+            <div class="actions" data-hero-target="fade">
                 {% if app.user %}
-                    <a class="btn btn-primary" href="{{ path('app_dashboard') }}">Voir mes chevaux</a>
+                    <a class="btn btn-primary" href="{{ path('app_dashboard') }}">Voir mes chevaux <span class="arrow" aria-hidden="true">→</span></a>
                 {% else %}
-                    <a class="btn btn-primary" href="{{ path('app_register') }}">Créer un compte</a>
+                    <a class="btn btn-primary" href="{{ path('app_register') }}">Créer un compte <span class="arrow" aria-hidden="true">→</span></a>
                     <a class="btn btn-ghost" href="{{ path('app_login') }}">Se connecter</a>
                 {% endif %}
             </div>
         </div>
     </section>
 
+    {# ---------- Démo animée ---------- #}
+    <section class="container demo" data-controller="pasture-demo" aria-label="Démonstration : un cheval au pré suivi en direct">
+        <div class="demo-card" data-reveal>
+            <svg class="demo-map" viewBox="0 0 640 360" role="img" aria-label="Un cheval se déplace dans son enclos ; son trajet se dessine et une alerte part quand il sort.">
+                <defs>
+                    <pattern id="grass" width="22" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(18)">
+                        <path d="M4 14q2-6 4 0M14 6q2-6 4 0" fill="none" stroke="#CFE1D6" stroke-width="1.2" stroke-linecap="round"/>
+                    </pattern>
+                </defs>
+                <rect width="640" height="360" fill="#EEF5F0"/>
+                <rect width="640" height="360" fill="url(#grass)" opacity=".7"/>
+                <g class="contours" fill="none" stroke="#CFE1D6" stroke-width="1.2">
+                    <path d="M-10 60 C120 20 260 90 380 40 S580 10 660 50"/>
+                    <path d="M-10 320 C140 280 220 350 380 310 S560 270 660 300"/>
+                    <path d="M560 360 C540 300 600 260 660 250"/>
+                </g>
+                <g class="trees" fill="#8DB89F">
+                    <circle cx="560" cy="70" r="20" opacity=".55"/><circle cx="585" cy="88" r="15" opacity=".45"/>
+                    <circle cx="48" cy="120" r="16" opacity=".5"/><circle cx="600" cy="300" r="22" opacity=".45"/>
+                </g>
+                <path d="M600 0 C590 90 610 160 640 210" fill="none" stroke="#C9DCEB" stroke-width="10" stroke-linecap="round" opacity=".8"/>
+                <polygon class="fence" data-pasture-demo-target="fence" points="120,70 450,50 520,230 330,310 90,250"/>
+                <path class="track" data-pasture-demo-target="track"
+                      d="M200 200 C230 150 300 140 320 180 S380 250 420 200 S470 110 400 100 S280 110 250 160 S300 262 380 262 S480 230 492 180 C500 150 540 140 600 160"/>
+                <g class="horse" data-pasture-demo-target="horse">
+                    <circle class="halo" r="16"/>
+                    <circle class="dot" r="8"/>
+                </g>
+            </svg>
+
+            <aside class="demo-panel">
+                <header>
+                    <div>
+                        <span class="eyebrow"><span class="live" aria-hidden="true"></span>En direct</span>
+                        <h2>Tornade</h2>
+                    </div>
+                    <span class="badge badge-ok" data-pasture-demo-target="status">Dans l'enclos</span>
+                </header>
+                <dl class="demo-metrics">
+                    <div><dt>Allure</dt><dd><span class="swap" data-pasture-demo-target="gait">Pas</span></dd></div>
+                    <div><dt>Sous la couverture</dt><dd><span class="swap" data-pasture-demo-target="temperature">27,4</span> °C</dd></div>
+                    <div><dt>Distance du jour</dt><dd><span data-pasture-demo-target="distance">0,0</span> km</dd></div>
+                    <div>
+                        <dt>Activité</dt>
+                        <dd><span data-pasture-demo-target="activity">26</span><small>/100</small></dd>
+                        <div class="meter"><span data-pasture-demo-target="activityBar"></span></div>
+                    </div>
+                </dl>
+                <div class="demo-toast" data-pasture-demo-target="toast" role="status">
+                    <span class="alert-dot critical" aria-hidden="true"></span>
+                    <div>
+                        <strong>Sortie d'enclos</strong>
+                        <p>Tornade est sorti de son enclos. Alerte envoyée à l'instant.</p>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </section>
+
+    {# ---------- Chiffres clés ---------- #}
+    <section class="section">
+        <div class="container">
+            <div class="grid grid-4 key-figures">
+                <div data-reveal>
+                    <span class="figure"><span data-count="995700">995 700</span></span>
+                    <p>équidés en France fin 2024, pour environ 100 000 détenteurs.</p>
+                </div>
+                <div data-reveal>
+                    <span class="figure"><span data-count="4">4</span><small> %</small></span>
+                    <p>des chevaux font une colique chaque année.</p>
+                </div>
+                <div data-reveal>
+                    <span class="figure"><span data-count="11">11</span><small> %</small></span>
+                    <p>des coliques sont mortelles : les repérer tôt change l'issue.</p>
+                </div>
+                <div data-reveal>
+                    <span class="figure"><span data-count="10">10</span><small> min</small></span>
+                    <p>entre deux envois, et une alerte immédiate en cas de problème.</p>
+                </div>
+            </div>
+            <p class="muted sources" data-reveal>Sources : IFCE, chiffres clés 2025 ; USDA, colique équine.</p>
+        </div>
+    </section>
+
+    {# ---------- Fonctions ---------- #}
     <section class="section" id="fonctions">
         <div class="container">
-            <div class="section-head">
+            <div class="section-head" data-reveal>
                 <p class="eyebrow">Ce que suit Equitrack</p>
                 <h2>Les premiers signaux faibles, avant qu'ils ne deviennent un problème</h2>
                 <p class="muted">La nuit et la plus grande partie de la journée, personne n'est auprès du cheval. Equitrack prend le relais.</p>
@@ -54,8 +144,8 @@
                     {icon: 'bell', title: 'Activité inhabituelle', text: 'Equitrack apprend les habitudes de votre cheval et signale l\'agitation, l\'immobilité ou les roulades répétées.'},
                     {icon: 'blanket', title: 'Conseil de couverture', text: 'Selon la météo, la tonte, le profil du cheval et ce qui est mesuré sous la couverture.'},
                 ] %}
-                    <article class="feature">
-                        <div class="icon">{{ _self.icon(feature.icon) }}</div>
+                    <article class="feature" data-reveal>
+                        <div class="icon icon-{{ feature.icon }}">{{ _self.icon(feature.icon) }}</div>
                         <h3>{{ feature.title }}</h3>
                         <p>{{ feature.text }}</p>
                     </article>
@@ -64,35 +154,43 @@
         </div>
     </section>
 
+    {# ---------- Fonctionnement ---------- #}
     <section class="band" id="fonctionnement">
         <div class="container">
-            <div class="section-head">
+            <div class="section-head" data-reveal>
                 <p class="eyebrow">Fonctionnement</p>
                 <h2>Du poitrail du cheval à votre téléphone</h2>
             </div>
-            <div class="grid grid-3 steps">
-                <div class="step">
-                    <h3>Le boîtier mesure</h3>
-                    <p>Fixé dans une poche de la couverture, il enregistre en continu les mouvements, la position, la température et l'humidité. Le brut reste sur sa carte microSD.</p>
-                </div>
-                <div class="step">
-                    <h3>Le réseau transmet</h3>
-                    <p>Toutes les 10 minutes, un résumé part par le réseau mobile LTE-M. En cas d'alerte, l'envoi est immédiat.</p>
-                </div>
-                <div class="step">
-                    <h3>Equitrack interprète</h3>
-                    <p>La plateforme compare les mesures aux habitudes du cheval et à la météo, puis vous alerte et vous conseille.</p>
+            <div class="steps-wrap">
+                <div class="grid grid-3 steps">
+                    <div class="step" data-reveal>
+                        <div class="step-icon">{{ _self.icon('chip') }}</div>
+                        <h3>Le boîtier mesure</h3>
+                        <p>Fixé dans une poche de la couverture, il enregistre en continu les mouvements, la position, la température et l'humidité. Le brut reste sur sa carte microSD.</p>
+                    </div>
+                    <div class="step" data-reveal>
+                        <div class="step-icon step-icon-signal">{{ _self.icon('signal') }}</div>
+                        <h3>Le réseau transmet</h3>
+                        <p>Toutes les 10 minutes, un résumé part par le réseau mobile LTE-M. En cas d'alerte, l'envoi est immédiat.</p>
+                    </div>
+                    <div class="step" data-reveal>
+                        <div class="step-icon">{{ _self.icon('spark') }}</div>
+                        <h3>Equitrack interprète</h3>
+                        <p>La plateforme compare les mesures aux habitudes du cheval et à la météo, puis vous alerte et vous conseille.</p>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
+    {# ---------- Appel à l'action ---------- #}
     <section class="section cta">
-        <div class="container">
+        <div class="container" data-reveal>
+            {{ include('_partials/_horseshoe.html.twig', {class: 'cta-shoe', stroke: 4}) }}
             <h2>Equitrack alerte, il ne diagnostique pas</h2>
             <p>Au moindre doute sur la santé de votre cheval, appelez votre vétérinaire.<br>L'historique d'Equitrack peut l'aider dans son examen.</p>
             {% if not app.user %}
-                <a class="btn btn-primary" href="{{ path('app_register') }}">Commencer le suivi</a>
+                <a class="btn btn-primary" href="{{ path('app_register') }}">Commencer le suivi <span class="arrow" aria-hidden="true">→</span></a>
             {% endif %}
         </div>
     </section>

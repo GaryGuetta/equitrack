@@ -31,4 +31,9 @@ return [
     'leaflet/dist/leaflet.min.css' => ['version' => '1.9.4', 'type' => 'css'],
     'chart.js' => ['version' => '4.6.1'],
     '@kurkle/color' => ['version' => '0.3.4'],
+    'gsap' => ['version' => '3.15.1'],
+    'gsap/ScrollTrigger' => ['version' => '3.15.1'],
+    'gsap/SplitText' => ['version' => '3.15.1'],
+    'gsap/DrawSVGPlugin' => ['version' => '3.15.1'],
+    'gsap/MotionPathPlugin' => ['version' => '3.15.1'],
 ];
