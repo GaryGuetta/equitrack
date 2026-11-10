@@ -1,0 +1,198 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ horse.name }}{% endblock %}
+
+{% block body %}
+    {% set device = horse.device %}
+    <div class="container page">
+        <div class="page-head">
+            <div>
+                <p class="eyebrow"><a href="{{ path('app_dashboard') }}">Mes chevaux</a> / Fiche</p>
+                <h1>{{ horse.name }}</h1>
+                <p>
+                    {{ horse.breed ?? 'Race non renseignée' }}{% if horse.age %} · {{ horse.age }} ans{% endif %}
+                    · {{ horse.clip.label }}
+                    · couverture actuelle : {{ horse.currentBlanket.shortLabel|lower }}
+                </p>
+            </div>
+            <div class="actions">
+                <a class="btn btn-ghost" href="{{ path('app_horse_export', {id: horse.id, jours: 7}) }}">Exporter 7 jours (CSV)</a>
+                <a class="btn btn-primary" href="{{ path('app_horse_edit', {id: horse.id}) }}">Modifier la fiche</a>
+            </div>
+        </div>
+
+        {# --- Indicateurs du jour --- #}
+        <div class="grid grid-4" style="margin-bottom:20px">
+            <div class="card stat">
+                <span class="stat-label">Position</span>
+                {% if insidePaddock is same as(false) %}
+                    <span class="stat-value" style="color:var(--critical)">Hors enclos</span>
+                {% elseif insidePaddock %}
+                    <span class="stat-value">Dans l'enclos</span>
+                {% else %}
+                    <span class="stat-value">—</span>
+                {% endif %}
+                <span class="stat-sub">{{ latest ? 'Relevée ' ~ latest.recordedAt|ago : 'Aucune mesure' }}</span>
+            </div>
+            <div class="card stat">
+                <span class="stat-label">Distance aujourd'hui</span>
+                <span class="stat-value">{{ (summary.distanceMeters / 1000)|number_format(1, ',') }}<small>km</small></span>
+                <span class="stat-sub">depuis minuit</span>
+            </div>
+            <div class="card stat">
+                <span class="stat-label">En mouvement</span>
+                <span class="stat-value">{{ summary.movingMinutes|duration }}</span>
+                <span class="stat-sub">{{ summary.rolls }} roulade{{ summary.rolls > 1 ? 's' }} aujourd'hui</span>
+            </div>
+            <div class="card stat">
+                <span class="stat-label">Sous la couverture</span>
+                <span class="stat-value">
+                    {{- latest and latest.temperature is not null ? latest.temperature|number_format(1, ',') : '—' }}<small>°C</small>
+                    {{ latest and latest.humidity is not null ? latest.humidity|round : '—' }}<small>% HR</small>
+                </span>
+                <span class="stat-sub">
+                    {% if latest and latest.outsideTemperature is not null %}Extérieur {{ latest.outsideTemperature|number_format(1, ',') }} °C{% else %}&nbsp;{% endif %}
+                </span>
+            </div>
+        </div>
+
+        <div class="grid grid-main">
+            <div class="stack">
+                <section class="card card-flush">
+                    <div
+                        class="map"
+                        data-controller="horse-map"
+                        data-horse-map-track-value="{{ track|json_encode }}"
+                        data-horse-map-current-value="{{ (latest and latest.hasPosition ? [latest.latitude, latest.longitude] : [])|json_encode }}"
+                        data-horse-map-paddock-value="{{ horse.paddock|json_encode }}"
+                        data-horse-map-outside-value="{{ insidePaddock is same as(false) ? 'true' : 'false' }}"
+                        data-horse-map-name-value="{{ horse.name }}"
+                        role="img"
+                        aria-label="Carte : enclos, trajet du jour et position de {{ horse.name }}"
+                    ></div>
+                    <div class="map-legend">
+                        <span><i class="zone"></i> Enclos</span>
+                        <span><i></i> Trajet du jour</span>
+                        <span><i class="pos"></i> Position actuelle</span>
+                        {% if not horse.hasPaddock %}
+                            <a href="{{ path('app_horse_edit', {id: horse.id}) }}#enclos">Tracer l'enclos</a>
+                        {% endif %}
+                    </div>
+                </section>
+
+                <section class="card">
+                    <div class="card-head">
+                        <h2>Climat sous la couverture</h2>
+                        <nav class="tabs" aria-label="Période">
+                            {% for key, period in periods %}
+                                <a href="{{ path('app_horse_show', {id: horse.id, periode: key}) }}" aria-current="{{ key == periode ? 'true' : 'false' }}">{{ period.label }}</a>
+                            {% endfor %}
+                        </nav>
+                    </div>
+                    {% if series.labels is empty %}
+                        <p class="muted">Pas encore de données sur cette période.</p>
+                    {% else %}
+                        <div class="chart-box">
+                            <canvas data-controller="chart" data-chart-kind-value="climate" data-chart-multi-day-value="{{ periode != '24h' ? 'true' : 'false' }}" data-chart-series-value="{{ series|json_encode }}" aria-label="Courbes de température et d'humidité"></canvas>
+                        </div>
+                    {% endif %}
+                </section>
+
+                <section class="card">
+                    <div class="card-head">
+                        <h2>Activité</h2>
+                        <span class="muted">sur {{ periods[periode].label }}</span>
+                    </div>
+                    {% if series.labels is empty %}
+                        <p class="muted">Pas encore de données sur cette période.</p>
+                    {% else %}
+                        <div class="chart-box">
+                            <canvas data-controller="chart" data-chart-kind-value="activity" data-chart-multi-day-value="{{ periode != '24h' ? 'true' : 'false' }}" data-chart-series-value="{{ series|json_encode }}" aria-label="Courbe d'activité"></canvas>
+                        </div>
+                    {% endif %}
+                </section>
+            </div>
+
+            <aside class="stack">
+                {# --- Conseil de couverture (F7) --- #}
+                <section class="card advice">
+                    <p class="eyebrow">Conseil de couverture</p>
+                    {% if advice %}
+                        <p class="advice-main">{{ advice.recommended.label }}</p>
+                        <span class="advice-verdict">
+                            {% if advice.verdict == 'ok' %}La couverture actuelle convient.
+                            {% elseif advice.verdict == 'lighter' %}Plus légère que l'actuelle ({{ advice.current.shortLabel }}).
+                            {% else %}Plus chaude que l'actuelle ({{ advice.current.shortLabel }}).{% endif %}
+                        </span>
+                        <ul>
+                            {% for reason in advice.reasons %}<li>{{ reason }}</li>{% endfor %}
+                            {% if forecast %}<li>Météo : {{ forecast.currentTemperature|round }} °C actuellement, vent {{ forecast.windSpeed|round }} km/h.</li>{% endif %}
+                        </ul>
+                        <p class="fine">Repères indicatifs, à adapter à votre cheval. En cas de doute, demandez conseil à un professionnel.</p>
+                    {% else %}
+                        <p>Pas assez d'informations : il faut une position (enclos ou boîtier) pour la météo, ou une mesure récente de la température extérieure.</p>
+                    {% endif %}
+                </section>
+
+                {# --- Allures du jour (F3) --- #}
+                <section class="card">
+                    <div class="card-head">
+                        <h3>Allures aujourd'hui</h3>
+                        <span class="muted">{{ summary.readingCount }} mesures</span>
+                    </div>
+                    {% set totalMinutes = summary.minutesByGait|reduce((sum, m) => sum + m, 0) %}
+                    {% if totalMinutes > 0 %}
+                        <div class="gait-bar" role="img" aria-label="Répartition des allures">
+                            {% for gait, minutes in summary.minutesByGait %}
+                                {% if minutes > 0 %}<span class="g-{{ gait }}" style="width: {{ (minutes / totalMinutes * 100)|round(2) }}%"></span>{% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="gait-legend">
+                            {% for gait in enum('App\\Enum\\Gait').cases() %}
+                                <div><i class="g-{{ gait.value }}"></i>{{ gait.label }}<strong>{{ summary.minutesByGait[gait.value]|duration }}</strong></div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="muted">Aucune donnée d'allure aujourd'hui.</p>
+                    {% endif %}
+                </section>
+
+                {# --- Alertes --- #}
+                <section class="card">
+                    <div class="card-head">
+                        <h3>Dernières alertes</h3>
+                        <a href="{{ path('app_alert_index', {filtre: 'toutes'}) }}">Historique</a>
+                    </div>
+                    {{ include('alert/_list.html.twig', {alerts: alerts}) }}
+                </section>
+
+                {# --- Boîtier --- #}
+                <section class="card" id="boitier">
+                    <h3>Boîtier</h3>
+                    {% for token in app.flashes('device_token') %}
+                        <div class="token-box" role="alert">
+                            <strong>Jeton du boîtier {{ device.serial }}</strong>
+                            <p class="muted" style="margin:4px 0 0">À copier dans le firmware maintenant : il ne sera plus affiché.</p>
+                            <code>{{ token }}</code>
+                        </div>
+                    {% endfor %}
+                    {% if device %}
+                        <dl class="kv">
+                            <dt>Numéro</dt><dd>{{ device.serial }}</dd>
+                            <dt>Dernier envoi</dt><dd>{{ device.lastSeenAt|ago }}</dd>
+                            <dt>Batterie</dt><dd>{{ device.batteryLevel is not null ? device.batteryLevel ~ ' %' : '—' }}</dd>
+                            <dt>État</dt><dd>{% if device.silent %}<span class="badge badge-warning">Hors ligne</span>{% else %}<span class="badge badge-ok">En ligne</span>{% endif %}</dd>
+                        </dl>
+                    {% else %}
+                        <p class="muted">Aucun boîtier associé. Générez un jeton puis inscrivez-le dans le firmware du boîtier.</p>
+                    {% endif %}
+                    <form method="post" action="{{ path('app_horse_device', {id: horse.id}) }}" style="margin-top:14px"
+                          {% if device %}onsubmit="return confirm('L\'ancien jeton cessera de fonctionner. Continuer ?')"{% endif %}>
+                        <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                        <button class="btn btn-ghost btn-sm" type="submit">{{ device ? 'Régénérer le jeton' : 'Associer un boîtier' }}</button>
+                    </form>
+                </section>
+            </aside>
+        </div>
+    </div>
+{% endblock %}

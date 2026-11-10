@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+
+{% set editing = horse.id is not null %}
+
+{% block title %}{{ editing ? 'Modifier ' ~ horse.name : 'Nouveau cheval' }}{% endblock %}
+
+{% block body %}
+    <div class="container page">
+        <div class="page-head">
+            <div>
+                <p class="eyebrow">
+                    <a href="{{ path('app_dashboard') }}">Mes chevaux</a>
+                    {% if editing %}/ <a href="{{ path('app_horse_show', {id: horse.id}) }}">{{ horse.name }}</a>{% endif %}
+                </p>
+                <h1>{{ editing ? 'Modifier la fiche' : 'Nouveau cheval' }}</h1>
+            </div>
+        </div>
+
+        {{ form_start(form) }}
+        <div class="grid grid-main">
+            <section class="card" id="enclos" data-controller="paddock-editor">
+                <h2>Enclos</h2>
+                <p class="muted">Cliquez sur la carte pour placer les coins de l'enclos. Une alerte part dès que le cheval en sort.</p>
+                <div class="map map-lg" data-paddock-editor-target="map"></div>
+                <div class="paddock-tools">
+                    <span class="muted" data-paddock-editor-target="count"></span>
+                    <button type="button" class="btn btn-ghost btn-sm" data-action="paddock-editor#locate">Ma position</button>
+                    <button type="button" class="btn btn-ghost btn-sm" data-action="paddock-editor#undo">Annuler le dernier point</button>
+                    <button type="button" class="btn btn-danger btn-sm" data-action="paddock-editor#clear">Effacer</button>
+                </div>
+                {{ form_widget(form.paddock, {attr: {'data-paddock-editor-target': 'input'}}) }}
+                {{ form_errors(form.paddock) }}
+            </section>
+
+            <section class="card">
+                <h2>Profil</h2>
+                {{ form_row(form.name) }}
+                <div class="form-grid">
+                    {{ form_row(form.breed) }}
+                    {{ form_row(form.birthYear) }}
+                </div>
+                {{ form_row(form.clip) }}
+                {{ form_row(form.currentBlanket) }}
+                {{ form_row(form.coldSensitive) }}
+                {{ form_row(form.hasShelter) }}
+                <button class="btn btn-primary btn-block" type="submit">{{ editing ? 'Enregistrer' : 'Ajouter le cheval' }}</button>
+            </section>
+        </div>
+        {{ form_end(form) }}
+
+        {% if editing %}
+            <section class="card" style="margin-top:20px">
+                <div class="card-head">
+                    <div>
+                        <h3>Supprimer {{ horse.name }}</h3>
+                        <p class="muted" style="margin:0">Supprime aussi tout l'historique de mesures et d'alertes. Action définitive.</p>
+                    </div>
+                    <form method="post" action="{{ path('app_horse_delete', {id: horse.id}) }}" onsubmit="return confirm('Supprimer définitivement {{ horse.name|e('js') }} et tout son historique ?')">
+                        <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                        <button class="btn btn-danger" type="submit">Supprimer</button>
+                    </form>
+                </div>
+            </section>
+        {% endif %}
+    </div>
+{% endblock %}

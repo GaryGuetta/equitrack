@@ -1,0 +1,99 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Le suivi connecté de votre cheval{% endblock %}
+
+{% macro icon(name) %}
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        {%- if name == 'pin' -%}<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>
+        {%- elseif name == 'activity' -%}<path d="M3 12h4l2.5-6 5 12 2.5-6H21"/>
+        {%- elseif name == 'thermo' -%}<path d="M14 14.8V5a2 2 0 1 0-4 0v9.8a4 4 0 1 0 4 0z"/><path d="M12 9v7"/>
+        {%- elseif name == 'fence' -%}<path d="M4 20V7l2-3 2 3v13M16 20V7l2-3 2 3v13M8 10h8M8 16h8"/>
+        {%- elseif name == 'bell' -%}<path d="M6 16V11a6 6 0 1 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/>
+        {%- elseif name == 'blanket' -%}<path d="M4 7c3-2 13-2 16 0v10c-3 2-13 2-16 0z"/><path d="M8 6v12M16 6v12"/>
+        {%- endif -%}
+    </svg>
+{% endmacro %}
+
+{% block body %}
+    <section class="hero">
+        <div class="container">
+            <p class="eyebrow">Boîtier connecté pour cheval</p>
+            <h1 class="visually-hidden">Equitrack</h1>
+            {{ include('_partials/_wordmark.html.twig') }}
+            <hr class="rule">
+            <p class="slogan">Parce que son bien-être<br>ne prend jamais de pause.</p>
+            <p class="lead">
+                Un boîtier glissé dans la couverture suit votre cheval jour et nuit : où il est, comment il bouge,
+                s'il a trop chaud ou trop froid. Equitrack interprète ces mesures, vous alerte au moindre signal
+                inhabituel et vous conseille la bonne couverture.
+            </p>
+            <div class="actions">
+                {% if app.user %}
+                    <a class="btn btn-primary" href="{{ path('app_dashboard') }}">Voir mes chevaux</a>
+                {% else %}
+                    <a class="btn btn-primary" href="{{ path('app_register') }}">Créer un compte</a>
+                    <a class="btn btn-ghost" href="{{ path('app_login') }}">Se connecter</a>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="fonctions">
+        <div class="container">
+            <div class="section-head">
+                <p class="eyebrow">Ce que suit Equitrack</p>
+                <h2>Les premiers signaux faibles, avant qu'ils ne deviennent un problème</h2>
+                <p class="muted">La nuit et la plus grande partie de la journée, personne n'est auprès du cheval. Equitrack prend le relais.</p>
+            </div>
+            <div class="grid grid-3">
+                {% for feature in [
+                    {icon: 'pin', title: 'Position et trajet', text: 'Position GPS actuelle, trajet de la journée et distance parcourue, sur une carte du pré.'},
+                    {icon: 'activity', title: 'Allures et comportement', text: 'Pas, trot, galop, repos, cheval couché, roulades : la centrale inertielle reconnaît chaque allure.'},
+                    {icon: 'thermo', title: 'Climat sous la couverture', text: 'Température et humidité au contact du cheval, comparées à la température extérieure.'},
+                    {icon: 'fence', title: 'Sortie d\'enclos', text: 'Tracez l\'enclos sur la carte : vous êtes prévenu dès que le cheval en sort.'},
+                    {icon: 'bell', title: 'Activité inhabituelle', text: 'Equitrack apprend les habitudes de votre cheval et signale l\'agitation, l\'immobilité ou les roulades répétées.'},
+                    {icon: 'blanket', title: 'Conseil de couverture', text: 'Selon la météo, la tonte, le profil du cheval et ce qui est mesuré sous la couverture.'},
+                ] %}
+                    <article class="feature">
+                        <div class="icon">{{ _self.icon(feature.icon) }}</div>
+                        <h3>{{ feature.title }}</h3>
+                        <p>{{ feature.text }}</p>
+                    </article>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <section class="band" id="fonctionnement">
+        <div class="container">
+            <div class="section-head">
+                <p class="eyebrow">Fonctionnement</p>
+                <h2>Du poitrail du cheval à votre téléphone</h2>
+            </div>
+            <div class="grid grid-3 steps">
+                <div class="step">
+                    <h3>Le boîtier mesure</h3>
+                    <p>Fixé dans une poche de la couverture, il enregistre en continu les mouvements, la position, la température et l'humidité. Le brut reste sur sa carte microSD.</p>
+                </div>
+                <div class="step">
+                    <h3>Le réseau transmet</h3>
+                    <p>Toutes les 10 minutes, un résumé part par le réseau mobile LTE-M. En cas d'alerte, l'envoi est immédiat.</p>
+                </div>
+                <div class="step">
+                    <h3>Equitrack interprète</h3>
+                    <p>La plateforme compare les mesures aux habitudes du cheval et à la météo, puis vous alerte et vous conseille.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section cta">
+        <div class="container">
+            <h2>Equitrack alerte, il ne diagnostique pas</h2>
+            <p>Au moindre doute sur la santé de votre cheval, appelez votre vétérinaire.<br>L'historique d'Equitrack peut l'aider dans son examen.</p>
+            {% if not app.user %}
+                <a class="btn btn-primary" href="{{ path('app_register') }}">Commencer le suivi</a>
+            {% endif %}
+        </div>
+    </section>
+{% endblock %}

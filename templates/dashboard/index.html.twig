@@ -1,0 +1,87 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes chevaux{% endblock %}
+
+{% block body %}
+    <div class="container page">
+        <div class="page-head">
+            <div>
+                <p class="eyebrow">Tableau de bord</p>
+                <h1>Bonjour {{ app.user.firstName }}</h1>
+                <p>
+                    {% set openCount = openAlertsByHorse|reduce((sum, n) => sum + n, 0) %}
+                    {% if openCount == 0 %}Aucune alerte en cours : tout va bien au pré.
+                    {% else %}{{ openCount }} alerte{{ openCount > 1 ? 's' }} à traiter.{% endif %}
+                </p>
+            </div>
+            <a class="btn btn-primary" href="{{ path('app_horse_new') }}">Ajouter un cheval</a>
+        </div>
+
+        {% if openAlerts is not empty %}
+            <section class="card" style="margin-bottom:24px">
+                <div class="card-head">
+                    <h2>À traiter</h2>
+                    <a href="{{ path('app_alert_index') }}">Toutes les alertes</a>
+                </div>
+                {{ include('alert/_list.html.twig', {alerts: openAlerts, show_horse: true}) }}
+            </section>
+        {% endif %}
+
+        <div class="grid grid-3">
+            {% for horse in horses %}
+                {% set reading = latest[horse.id] ?? null %}
+                {% set alertsCount = openAlertsByHorse[horse.id] ?? 0 %}
+                <a class="card horse-card" href="{{ path('app_horse_show', {id: horse.id}) }}">
+                    <header>
+                        <div>
+                            <h3>{{ horse.name }}</h3>
+                            <span class="muted">{{ horse.breed ?? 'Race non renseignée' }}{% if horse.age %} · {{ horse.age }} ans{% endif %}</span>
+                        </div>
+                        {% if alertsCount > 0 %}
+                            <span class="badge badge-critical">{{ alertsCount }} alerte{{ alertsCount > 1 ? 's' }}</span>
+                        {% elseif horse.device is null %}
+                            <span class="badge badge-muted">Sans boîtier</span>
+                        {% elseif horse.device.silent %}
+                            <span class="badge badge-warning">Hors ligne</span>
+                        {% else %}
+                            <span class="badge badge-ok">Suivi actif</span>
+                        {% endif %}
+                    </header>
+
+                    {% if reading %}
+                        <div class="metrics">
+                            <div class="stat">
+                                <span class="stat-label">Allure</span>
+                                <span class="stat-value">{{ reading.gait ? reading.gait.label : '—' }}</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Couverture</span>
+                                <span class="stat-value">{{ reading.temperature is not null ? reading.temperature|number_format(1, ',') : '—' }}<small>°C</small></span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Humidité</span>
+                                <span class="stat-value">{{ reading.humidity is not null ? reading.humidity|round : '—' }}<small>%</small></span>
+                            </div>
+                        </div>
+                        <footer>
+                            <span>Mesure {{ reading.recordedAt|ago }}</span>
+                            {% if horse.device and horse.device.batteryLevel is not null %}
+                                <span>Batterie {{ horse.device.batteryLevel }} %</span>
+                            {% endif %}
+                        </footer>
+                    {% else %}
+                        <p class="muted">Aucune mesure reçue pour l'instant.</p>
+                    {% endif %}
+                </a>
+            {% endfor %}
+
+            <a class="card add-card" href="{{ path('app_horse_new') }}">
+                <div>
+                    <div class="plus">+</div>
+                    <strong>Ajouter un cheval</strong>
+                    <p class="muted">Profil, enclos et boîtier</p>
+                </div>
+            </a>
+        </div>
+    </div>
+{% endblock %}

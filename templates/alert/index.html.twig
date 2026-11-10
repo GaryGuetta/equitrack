@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Alertes{% endblock %}
+
+{% block body %}
+    <div class="container page">
+        <div class="page-head">
+            <div>
+                <p class="eyebrow">Surveillance</p>
+                <h1>Alertes</h1>
+                <p>Equitrack alerte, il ne diagnostique pas : en cas de doute, appelez votre vétérinaire.</p>
+            </div>
+            <nav class="tabs" aria-label="Filtre">
+                <a href="{{ path('app_alert_index') }}" aria-current="{{ showAll ? 'false' : 'true' }}">À traiter</a>
+                <a href="{{ path('app_alert_index', {filtre: 'toutes'}) }}" aria-current="{{ showAll ? 'true' : 'false' }}">Historique</a>
+            </nav>
+        </div>
+
+        <section class="card">
+            {{ include('alert/_list.html.twig', {alerts: alerts, show_horse: true}) }}
+        </section>
+    </div>
+{% endblock %}

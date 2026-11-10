@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{% block title %}Suivi connecté du cheval{% endblock %} · Equitrack</title>
+        <meta name="description" content="{% block description %}Equitrack suit votre cheval 24 h/24 : position, activité, température sous la couverture, alertes et conseil de couverture.{% endblock %}">
+        <meta name="theme-color" content="#1E3A2F">
+        <link rel="icon" href="{{ asset('images/favicon.svg') }}" type="image/svg+xml">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300&family=Outfit:wght@400;500;600&display=swap">
+        {% block stylesheets %}{% endblock %}
+
+        {% block javascripts %}
+            {% block importmap %}{{ importmap('app') }}{% endblock %}
+        {% endblock %}
+    </head>
+    <body>
+        {% set route = app.current_route %}
+        <header class="site-header">
+            <div class="container">
+                {{ include('_partials/_wordmark.html.twig') }}
+                <nav class="nav" aria-label="Navigation principale">
+                    {% if app.user %}
+                        <a href="{{ path('app_dashboard') }}" {{ route == 'app_dashboard' ? 'aria-current="page"' }}>Mes chevaux</a>
+                        {% set alertCount = open_alert_count() %}
+                        <a href="{{ path('app_alert_index') }}" {{ route == 'app_alert_index' ? 'aria-current="page"' }}>
+                            Alertes{% if alertCount > 0 %} <span class="count" aria-label="{{ alertCount }} non traitées">{{ alertCount }}</span>{% endif %}
+                        </a>
+                        <a href="{{ path('app_logout') }}">Déconnexion</a>
+                    {% else %}
+                        <a href="{{ path('app_home') }}#fonctions">Fonctions</a>
+                        <a href="{{ path('app_home') }}#fonctionnement">Fonctionnement</a>
+                        <a href="{{ path('app_login') }}" {{ route == 'app_login' ? 'aria-current="page"' }}>Connexion</a>
+                    {% endif %}
+                </nav>
+            </div>
+        </header>
+
+        <main>
+            {% set flashes = app.flashes(['success', 'error']) %}
+            {% if flashes.success is not empty or flashes.error is not empty %}
+                <div class="container flashes" role="status">
+                    {% for message in flashes.success %}<div class="flash">{{ message }}</div>{% endfor %}
+                    {% for message in flashes.error %}<div class="flash flash-error">{{ message }}</div>{% endfor %}
+                </div>
+            {% endif %}
+
+            {% block body %}{% endblock %}
+        </main>
+
+        <footer class="site-footer">
+            <div class="container">
+                {{ include('_partials/_wordmark.html.twig', {holes: 'var(--forest)'}) }}
+                <em>Parce que son bien-être ne prend jamais de pause.</em>
+                <span>Projet de fin d'études · {{ 'now'|date('Y') }}</span>
+            </div>
+        </footer>
+    </body>
+</html>

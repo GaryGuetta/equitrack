@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="fr">
+<body style="margin:0;padding:24px;background:#FBF8F1;font-family:Arial,Helvetica,sans-serif;color:#1B2A23">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #E7E1D4;border-radius:12px">
+        <tr>
+            <td style="background:#1E3A2F;color:#FBF8F1;padding:18px 24px;border-radius:12px 12px 0 0;font-family:Georgia,serif;font-size:22px">Equitrack</td>
+        </tr>
+        <tr>
+            <td style="padding:24px">
+                <p style="margin:0 0 12px">Bonjour {{ firstName }},</p>
+                <p style="margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:1px;color:{{ alert.severity.value == 'critical' ? '#A63D2B' : '#9A6416' }}">
+                    {{ alert.severity.label }} · {{ alert.type.label }}
+                </p>
+                <p style="margin:0 0 16px;font-size:17px;line-height:1.5">{{ alert.message }}</p>
+                <p style="margin:0 0 20px;color:#5E6B64;font-size:14px">Mesure du {{ alert.triggeredAt|format_datetime('long', 'short') }}.</p>
+                <a href="{{ url('app_horse_show', {id: alert.horse.id}) }}" style="display:inline-block;background:#1E3A2F;color:#FBF8F1;text-decoration:none;padding:12px 20px;border-radius:999px">Voir la fiche de {{ alert.horse.name }}</a>
+                <p style="margin:24px 0 0;color:#5E6B64;font-size:12px">Equitrack alerte, il ne diagnostique pas. En cas de doute sur la santé de votre cheval, appelez votre vétérinaire.</p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

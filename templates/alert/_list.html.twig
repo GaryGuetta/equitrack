@@ -1,0 +1,31 @@
+{# Liste d'alertes. Variables : alerts, show_horse (bool) #}
+{% if alerts is empty %}
+    <p class="muted">Aucune alerte. Tout va bien.</p>
+{% else %}
+    <ul class="alert-list">
+        {% for alert in alerts %}
+            <li class="alert-item{{ alert.open ? '' : ' is-done' }}">
+                <span class="alert-dot {{ alert.severity.value }}" aria-hidden="true"></span>
+                <div>
+                    <strong>{{ alert.type.label }}</strong>
+                    {% if show_horse|default(false) %}
+                        · <a href="{{ path('app_horse_show', {id: alert.horse.id}) }}">{{ alert.horse.name }}</a>
+                    {% endif %}
+                    <p>{{ alert.message }}</p>
+                    <span class="when">
+                        {{ alert.triggeredAt|format_datetime('medium', 'short') }} · {{ alert.triggeredAt|ago }}
+                        {% if not alert.open %} · traitée {{ alert.acknowledgedAt|ago }}{% endif %}
+                    </span>
+                </div>
+                {% if alert.open %}
+                    <form class="inline-form" method="post" action="{{ path('app_alert_acknowledge', {id: alert.id}) }}">
+                        <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                        <button class="btn btn-ghost btn-sm" type="submit">Traitée</button>
+                    </form>
+                {% else %}
+                    <span class="badge badge-muted">Traitée</span>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}
