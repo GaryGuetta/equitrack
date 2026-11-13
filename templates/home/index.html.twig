@@ -104,18 +104,23 @@
 
     {# ---------- Le boîtier en 3D, piloté par le défilement ---------- #}
     {% set chapters = [
-        {kicker: 'Le boîtier', title: 'Glissé dans la couverture, il ne la quitte plus', text: 'Environ 126 × 48 × 30 mm, coque arrondie en PETG, joint et pare-chocs en TPU côté cheval. Il se range dans une poche en néoprène au poitrail et se recharge en USB-C.', chips: ['Étanchéité IP67 visée', 'Aucun point dur', 'USB-C']},
+        {kicker: 'Le prototype', title: 'Glissé dans la couverture, il ne la quitte plus', text: 'Voici la maquette du prototype réalisé pour notre projet de fin d\'études : environ 126 × 48 × 30 mm, coque arrondie en PETG imprimée en 3D, joint et pare-chocs en TPU côté cheval. Il se range dans une poche en néoprène au poitrail et se recharge en USB-C. Formes et dimensions évolueront avec les essais.', chips: ['Prototype PFE', 'Étanchéité IP67 visée', 'USB-C']},
         {kicker: 'À l\'intérieur', title: 'Une carte, cinq capteurs, une batterie', text: 'Une carte ESP32-S3 avec modem LTE-M intégré, un GPS, une centrale inertielle, un capteur de température et d\'humidité, une sonde extérieure, une carte microSD et une batterie 18650.', chips: ['ESP32-S3', 'FreeRTOS']},
         {kicker: 'F2 · F4 — Position', title: 'Il sait où est votre cheval, à 2 m près', anchor: 'gnss', hotspot: 'GPS Quectel L76K', text: 'Le module GPS Quectel L76K fonctionne en même temps que la 4G. Position actuelle, trajet du jour, distance parcourue, et une alerte moins de 5 minutes après une sortie d\'enclos.', chips: ['2 m CEP', 'Antenne active', 'Enclos sur carte']},
         {kicker: 'F3 · F8 — Mouvements', title: 'Pas, trot, galop… et les roulades', anchor: 'imu', hotspot: 'IMU LSM6DSOX', text: 'La centrale inertielle LSM6DSOX reconnaît les allures, le cheval couché ou debout et les roulades. Le brut à 100 Hz est gardé sur la microSD pour entraîner les modèles ; Equitrack apprend ainsi les habitudes du cheval.', chips: ['≥ 90 % des allures', '100 Hz', 'microSD 16 Go']},
         {kicker: 'F1 · F9 — Climat', title: 'Ce qu\'il ressent sous la couverture', anchor: 'climate', hotspot: 'SHT41 · membrane PTFE', text: 'Le SHT41, derrière une membrane PTFE face au cheval, mesure la température et l\'humidité de l\'air sous la couverture. La sonde DS18B20 mesure dehors : l\'écart dit si la couverture isole trop ou pas assez.', chips: ['± 0,5 °C', '± 3 % HR', 'Sonde extérieure']},
         {kicker: 'F5 — Transmission', title: 'Un lot toutes les 10 minutes, l\'alerte tout de suite', anchor: 'lte', hotspot: 'Modem SIM7080G · LTE-M', text: 'Le modem SIM7080G passe par le réseau LTE-M d\'Orange, SFR ou Bouygues, sans station à installer. La 2G s\'éteint fin 2026 : Equitrack n\'en dépend pas.', chips: ['LTE-M', 'Envoi groupé', 'Alerte immédiate']},
         {kicker: 'Énergie', title: 'Une semaine entre deux recharges', anchor: 'battery', hotspot: 'Batterie 18650 · 3 500 mAh', text: 'Batterie 18650 de 3 500 mAh, protégée par la carte. Le GPS ne s\'allume que quand l\'IMU détecte du mouvement et le modem dort entre deux envois : environ 8 jours d\'autonomie visés, à confirmer par les mesures.', chips: ['3 500 mAh', '≈ 8 jours visés', 'Recharge à l\'abri']},
-        {kicker: 'Equitrack', title: 'Tout ça, au poitrail de votre cheval', text: 'Le boîtier mesure, le réseau transmet, la plateforme interprète. Vous, vous recevez l\'alerte quand il le faut, et le bon conseil de couverture chaque jour.', chips: []},
+        {kicker: 'Equitrack', title: 'Tout ça, au poitrail de votre cheval', text: 'Le boîtier mesure, le réseau transmet, la plateforme interprète. Vous, vous recevez l\'alerte quand il le faut, et le bon conseil de couverture chaque jour. Ce prototype sera validé pas à pas lors des essais en écurie.', chips: []},
     ] %}
     <section class="showcase" data-controller="device-showcase" aria-label="Le boîtier Equitrack en 3D">
         <div class="showcase-stage" data-device-showcase-target="stage">
             <canvas class="showcase-canvas" data-device-showcase-target="canvas" aria-hidden="true"></canvas>
+
+            <p class="prototype-badge">
+                <span class="prototype-dot" aria-hidden="true"></span>
+                Maquette du prototype · le boîtier final peut différer
+            </p>
 
             <div class="hotspot" data-device-showcase-target="hotspot" aria-hidden="true">
                 <span class="hotspot-dot"></span>

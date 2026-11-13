@@ -19,7 +19,7 @@
             {% block importmap %}{{ importmap('app') }}{% endblock %}
         {% endblock %}
     </head>
-    <body>
+    <body class="{{ app.user ? 'is-auth' : 'is-guest' }}">
         {% set route = app.current_route %}
         <header class="site-header" data-controller="header">
             <div class="container">
@@ -33,8 +33,6 @@
                         </a>
                         <a href="{{ path('app_logout') }}">Déconnexion</a>
                     {% else %}
-                        <a href="{{ path('app_home') }}#fonctions">Fonctions</a>
-                        <a href="{{ path('app_home') }}#fonctionnement">Fonctionnement</a>
                         <a href="{{ path('app_login') }}" {{ route == 'app_login' ? 'aria-current="page"' }}>Connexion</a>
                     {% endif %}
                 </nav>
