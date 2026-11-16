@@ -90,6 +90,7 @@ final class HorseController extends AbstractController
             'periode' => $periode,
             'periods' => self::PERIODS,
             'forecast' => $forecast,
+            'hasPosition' => null !== $position,
             'advice' => $advisor->advise($horse, $forecast, $latest),
             'alerts' => $alerts->findRecentForHorse($horse, 8),
         ]);

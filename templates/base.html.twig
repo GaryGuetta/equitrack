@@ -52,13 +52,32 @@
         </main>
 
         <footer class="site-footer">
-            <div class="container">
+            {{ include('_partials/_horseshoe.html.twig', {class: 'footer-watermark', stroke: 2}) }}
+            <div class="container footer-top">
                 <div class="footer-brand">
                     {{ include('_partials/_wordmark.html.twig') }}
                     <em>Parce que son bien-être ne prend jamais de pause.</em>
+                    <p>Un boîtier glissé dans la couverture, une plateforme qui veille sur votre cheval jour et nuit.</p>
                 </div>
-                {{ include('_partials/_socials.html.twig') }}
-                <span class="footer-meta">Projet de fin d'études · {{ 'now'|date('Y') }}</span>
+                <nav class="footer-col" aria-label="Votre espace">
+                    <h2>Votre espace</h2>
+                    {% if app.user %}
+                        <a href="{{ path('app_dashboard') }}">Mes chevaux</a>
+                        <a href="{{ path('app_alert_index') }}">Alertes</a>
+                        <a href="{{ path('app_horse_new') }}">Ajouter un cheval</a>
+                    {% else %}
+                        <a href="{{ path('app_login') }}">Connexion</a>
+                        <a href="{{ path('app_register') }}">Créer un compte</a>
+                    {% endif %}
+                </nav>
+                <div class="footer-col">
+                    <h2>Nous écrire</h2>
+                    {{ include('_partials/_socials.html.twig', {class: 'socials-stack'}) }}
+                </div>
+            </div>
+            <div class="container footer-bottom">
+                <span>© {{ 'now'|date('Y') }} Equitrack · Projet de fin d'études</span>
+                <span>Equitrack alerte, il ne diagnostique pas : en cas de doute, appelez votre vétérinaire.</span>
             </div>
         </footer>
     </body>

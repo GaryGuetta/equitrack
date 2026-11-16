@@ -1,0 +1,13 @@
+{# Volet de marque des pages de connexion et d'inscription. #}
+{% import '_partials/_icons.html.twig' as ui %}
+<aside class="auth-aside">
+    {{ include('_partials/_horseshoe.html.twig', {class: 'auth-watermark', stroke: 2}) }}
+    {{ include('_partials/_wordmark.html.twig') }}
+    <p class="auth-slogan">Parce que son bien-être ne prend jamais de pause.</p>
+    <ul class="auth-points">
+        <li><span>{{ ui.icon('pin') }}</span>Position, trajet et sortie d'enclos</li>
+        <li><span>{{ ui.icon('activity') }}</span>Allures, roulades et activité inhabituelle</li>
+        <li><span>{{ ui.icon('blanket') }}</span>Le bon conseil de couverture, chaque jour</li>
+    </ul>
+    <p class="auth-note">Projet de fin d'études · prototype en cours d'essais</p>
+</aside>

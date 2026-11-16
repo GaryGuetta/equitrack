@@ -38,7 +38,7 @@ class WeatherProvider
             $item->expiresAfter(1800);
             try {
                 $data = $this->httpClient->request('GET', self::ENDPOINT, [
-                    'timeout' => 4,
+                    'timeout' => 8,
                     'query' => [
                         'latitude' => round($latitude, 3),
                         'longitude' => round($longitude, 3),

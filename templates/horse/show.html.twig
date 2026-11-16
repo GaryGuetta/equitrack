@@ -2,18 +2,23 @@
 
 {% block title %}{{ horse.name }}{% endblock %}
 
+{% import '_partials/_icons.html.twig' as ui %}
+
 {% block body %}
     {% set device = horse.device %}
     <div class="container page">
         <div class="page-head">
-            <div>
-                <p class="eyebrow"><a href="{{ path('app_dashboard') }}">Mes chevaux</a> / Fiche</p>
-                <h1>{{ horse.name }}</h1>
-                <p>
-                    {{ horse.breed ?? 'Race non renseignée' }}{% if horse.age %} · {{ horse.age }} ans{% endif %}
-                    · {{ horse.clip.label }}
-                    · couverture actuelle : {{ horse.currentBlanket.shortLabel|lower }}
-                </p>
+            <div class="page-title">
+                <span class="avatar avatar-lg" aria-hidden="true">{{ horse.name|first|upper }}</span>
+                <div>
+                    <p class="eyebrow"><a href="{{ path('app_dashboard') }}">Mes chevaux</a> / Fiche</p>
+                    <h1>{{ horse.name }}</h1>
+                    <p>
+                        {{ horse.breed ?? 'Race non renseignée' }}{% if horse.age %} · {{ horse.age }} ans{% endif %}
+                        · {{ horse.clip.label }}
+                        · couverture actuelle : {{ horse.currentBlanket.shortLabel|lower }}
+                    </p>
+                </div>
             </div>
             <div class="actions">
                 <a class="btn btn-ghost" href="{{ path('app_horse_export', {id: horse.id, jours: 7}) }}">Exporter 7 jours (CSV)</a>
@@ -24,6 +29,7 @@
         {# --- Indicateurs du jour --- #}
         <div class="grid grid-4" style="margin-bottom:20px">
             <div class="card stat" data-reveal>
+                <span class="stat-icon">{{ ui.icon('pin') }}</span>
                 <span class="stat-label">Position</span>
                 {% if insidePaddock is same as(false) %}
                     <span class="stat-value" style="color:var(--critical)">Hors enclos</span>
@@ -35,16 +41,19 @@
                 <span class="stat-sub">{{ latest ? 'Relevée ' ~ latest.recordedAt|ago : 'Aucune mesure' }}</span>
             </div>
             <div class="card stat" data-reveal>
+                <span class="stat-icon">{{ ui.icon('route') }}</span>
                 <span class="stat-label">Distance aujourd'hui</span>
                 <span class="stat-value"><span data-count="{{ (summary.distanceMeters / 1000)|round(1) }}" data-decimals="1">{{ (summary.distanceMeters / 1000)|number_format(1, ',') }}</span><small>km</small></span>
                 <span class="stat-sub">depuis minuit</span>
             </div>
             <div class="card stat" data-reveal>
+                <span class="stat-icon">{{ ui.icon('activity') }}</span>
                 <span class="stat-label">En mouvement</span>
                 <span class="stat-value">{{ summary.movingMinutes|duration }}</span>
                 <span class="stat-sub">{{ summary.rolls }} roulade{{ summary.rolls > 1 ? 's' }} aujourd'hui</span>
             </div>
             <div class="card stat" data-reveal>
+                <span class="stat-icon">{{ ui.icon('thermo') }}</span>
                 <span class="stat-label">Sous la couverture</span>
                 <span class="stat-value">
                     {{- latest and latest.temperature is not null ? latest.temperature|number_format(1, ',') : '—' }}<small>°C</small>
@@ -130,7 +139,11 @@
                         </ul>
                         <p class="fine">Repères indicatifs, à adapter à votre cheval. En cas de doute, demandez conseil à un professionnel.</p>
                     {% else %}
-                        <p>Pas assez d'informations : il faut une position (enclos ou boîtier) pour connaître la météo.</p>
+                        {% if hasPosition %}
+                            <p>Pas assez d'informations : la météo locale ne répond pas pour l'instant. Réessayez dans quelques minutes.</p>
+                        {% else %}
+                            <p>Pas assez d'informations : il faut une position (enclos ou boîtier) pour connaître la météo.</p>
+                        {% endif %}
                     {% endif %}
                 </section>
 

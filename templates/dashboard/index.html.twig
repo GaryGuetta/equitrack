@@ -6,7 +6,7 @@
     <div class="container page">
         <div class="page-head">
             <div>
-                <p class="eyebrow">Tableau de bord</p>
+                <p class="eyebrow">Tableau de bord · {{ 'now'|format_date(pattern: 'EEEE d MMMM', locale: 'fr') }}</p>
                 <h1>Bonjour {{ app.user.firstName }}</h1>
                 <p>
                     {% set openCount = openAlertsByHorse|reduce((sum, n) => sum + n, 0) %}
@@ -31,8 +31,10 @@
             {% for horse in horses %}
                 {% set reading = latest[horse.id] ?? null %}
                 {% set alertsCount = openAlertsByHorse[horse.id] ?? 0 %}
-                <a class="card horse-card" href="{{ path('app_horse_show', {id: horse.id}) }}" data-reveal data-controller="tilt">
+                {% set status = alertsCount > 0 ? 'alert' : (horse.device is null ? 'none' : (horse.device.silent ? 'offline' : 'ok')) %}
+                <a class="card horse-card is-{{ status }}" href="{{ path('app_horse_show', {id: horse.id}) }}" data-reveal data-controller="tilt">
                     <header>
+                        <span class="avatar" aria-hidden="true">{{ horse.name|first|upper }}</span>
                         <div>
                             <h3>{{ horse.name }}</h3>
                             <span class="muted">{{ horse.breed ?? 'Race non renseignée' }}{% if horse.age %} · {{ horse.age }} ans{% endif %}</span>

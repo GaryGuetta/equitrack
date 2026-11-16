@@ -4,22 +4,25 @@
 
 {% block body %}
     <div class="container auth">
-        <div class="card">
-            <h1>Créer un compte</h1>
-            <p class="muted">Quelques secondes suffisent. Vous ajouterez ensuite vos chevaux et leurs boîtiers.</p>
+        <div class="auth-shell" data-reveal>
+            {{ include('_partials/_auth_aside.html.twig') }}
+            <div class="auth-form">
+                <h1>Créer un compte</h1>
+                <p class="muted">Quelques secondes suffisent. Vous ajouterez ensuite vos chevaux et leurs boîtiers.</p>
 
-            {{ form_start(form) }}
-                {{ form_row(form.firstName) }}
-                {{ form_row(form.email) }}
-                {{ form_row(form.plainPassword.first) }}
-                {{ form_row(form.plainPassword.second) }}
-                {{ form_row(form.agreeTerms) }}
-                <button class="btn btn-primary btn-block" type="submit">Créer mon compte</button>
-            {{ form_end(form) }}
+                {{ form_start(form) }}
+                    {{ form_row(form.firstName) }}
+                    {{ form_row(form.email) }}
+                    {{ form_row(form.plainPassword.first) }}
+                    {{ form_row(form.plainPassword.second) }}
+                    {{ form_row(form.agreeTerms) }}
+                    <button class="btn btn-primary btn-block" type="submit">Créer mon compte</button>
+                {{ form_end(form) }}
 
-            <p class="muted" style="margin:20px 0 0;text-align:center">
-                Déjà inscrit ? <a href="{{ path('app_login') }}">Se connecter</a>
-            </p>
+                <p class="muted auth-switch">
+                    Déjà inscrit ? <a href="{{ path('app_login') }}">Se connecter</a>
+                </p>
+            </div>
         </div>
     </div>
 {% endblock %}

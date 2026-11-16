@@ -2,25 +2,37 @@
 
 {% block title %}Le suivi connecté de votre cheval{% endblock %}
 
-{% macro icon(name) %}
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        {%- if name == 'pin' -%}<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>
-        {%- elseif name == 'activity' -%}<path d="M3 12h4l2.5-6 5 12 2.5-6H21"/>
-        {%- elseif name == 'thermo' -%}<path d="M14 14.8V5a2 2 0 1 0-4 0v9.8a4 4 0 1 0 4 0z"/><path d="M12 9v7"/>
-        {%- elseif name == 'fence' -%}<path d="M4 20V7l2-3 2 3v13M16 20V7l2-3 2 3v13M8 10h8M8 16h8"/>
-        {%- elseif name == 'bell' -%}<path d="M6 16V11a6 6 0 1 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/>
-        {%- elseif name == 'blanket' -%}<path d="M4 7c3-2 13-2 16 0v10c-3 2-13 2-16 0z"/><path d="M8 6v12M16 6v12"/>
-        {%- elseif name == 'chip' -%}<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>
-        {%- elseif name == 'signal' -%}<path d="M12 20v-6"/><path class="wave w1" d="M8.5 10.5a5 5 0 0 1 7 0"/><path class="wave w2" d="M5.5 7.5a9 9 0 0 1 13 0"/><circle cx="12" cy="14" r="1.2" fill="currentColor"/>
-        {%- elseif name == 'spark' -%}<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/>
-        {%- endif -%}
-    </svg>
-{% endmacro %}
+{% import '_partials/_icons.html.twig' as ui %}
 
 {% block body %}
     {# ---------- Accueil ---------- #}
-    <section class="hero" data-controller="hero">
+    <section class="hero" data-controller="hero" data-action="mousemove->hero#parallax">
         <div class="hero-glow" aria-hidden="true"></div>
+        {# Courbes de niveau d'un pré, tracées à l'arrivée #}
+        <svg class="hero-contours" viewBox="0 0 1440 640" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+            {% for i in 0..6 %}
+                <path data-hero-target="contour" d="M-40 {{ 90 + i * 74 }} C 220 {{ 30 + i * 74 }}, 380 {{ 170 + i * 70 }}, 640 {{ 110 + i * 72 }} S 1080 {{ 20 + i * 78 }}, 1480 {{ 120 + i * 70 }}"/>
+            {% endfor %}
+        </svg>
+
+        {# Instantanés « en direct » autour du logo (grands écrans) #}
+        <div class="hero-float hero-float-a" data-hero-target="float" data-depth="18" aria-hidden="true">
+            <span class="float-icon">{{ ui.icon('thermo') }}</span>
+            <span><small>Sous la couverture</small><strong>27,4 °C · 61 %</strong></span>
+        </div>
+        <div class="hero-float hero-float-b" data-hero-target="float" data-depth="-24" aria-hidden="true">
+            <span class="float-icon float-icon-live"><span class="live"></span></span>
+            <span><small>Tornade · en direct</small><strong>Au trot · 3,2 km</strong></span>
+        </div>
+        <div class="hero-float hero-float-c" data-hero-target="float" data-depth="12" aria-hidden="true">
+            <span class="float-icon float-icon-alert">{{ ui.icon('bell') }}</span>
+            <span><small>Alerte · il y a 1 min</small><strong>Roulades répétées</strong></span>
+        </div>
+        <div class="hero-float hero-float-d" data-hero-target="float" data-depth="-14" aria-hidden="true">
+            <span class="float-icon">{{ ui.icon('blanket') }}</span>
+            <span><small>Conseil du soir</small><strong>Couverture 150 g</strong></span>
+        </div>
+
         <div class="container">
             <p class="eyebrow" data-hero-target="fade">Boîtier connecté pour cheval</p>
             <h1 class="visually-hidden">Equitrack</h1>
@@ -46,6 +58,11 @@
     {# ---------- Démo animée ---------- #}
     <section class="container demo" data-controller="pasture-demo" aria-label="Démonstration : un cheval au pré suivi en direct">
         <div class="demo-card" data-reveal>
+            <div class="demo-chrome" aria-hidden="true">
+                <span class="chrome-dots"><i></i><i></i><i></i></span>
+                <span class="chrome-url">{{ include('_partials/_horseshoe.html.twig', {class: 'chrome-shoe', stroke: 7}) }} equitrack · suivi en direct</span>
+                <span class="chrome-live"><span class="live"></span>Direct</span>
+            </div>
             <svg class="demo-map" viewBox="0 0 640 360" role="img" aria-label="Un cheval se déplace dans son enclos ; son trajet se dessine et une alerte part quand il sort.">
                 <defs>
                     <pattern id="grass" width="22" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(18)">
@@ -190,7 +207,7 @@
         </div>
     </div>
 
-    {# ---------- Fonctions ---------- #}
+    {# ---------- Fonctions : mosaïque illustrée ---------- #}
     <section class="section" id="fonctions">
         <div class="container">
             <div class="section-head" data-reveal>
@@ -198,66 +215,177 @@
                 <h2>Les premiers signaux faibles, avant qu'ils ne deviennent un problème</h2>
                 <p class="muted">La nuit et la plus grande partie de la journée, personne n'est auprès du cheval. Equitrack prend le relais.</p>
             </div>
-            <div class="grid grid-3">
-                {% for feature in [
-                    {icon: 'pin', title: 'Position et trajet', text: 'Position GPS actuelle, trajet de la journée et distance parcourue, sur une carte du pré.'},
-                    {icon: 'activity', title: 'Allures et comportement', text: 'Pas, trot, galop, repos, cheval couché, roulades : la centrale inertielle reconnaît chaque allure.'},
-                    {icon: 'thermo', title: 'Climat sous la couverture', text: 'Température et humidité au contact du cheval, comparées à la météo locale.'},
-                    {icon: 'fence', title: 'Sortie d\'enclos', text: 'Tracez l\'enclos sur la carte : vous êtes prévenu dès que le cheval en sort.'},
-                    {icon: 'bell', title: 'Activité inhabituelle', text: 'Equitrack apprend les habitudes de votre cheval et signale l\'agitation, l\'immobilité ou les roulades répétées.'},
-                    {icon: 'blanket', title: 'Conseil de couverture', text: 'Selon la météo, la tonte, le profil du cheval et ce qui est mesuré sous la couverture.'},
-                ] %}
-                    <article class="feature" data-reveal data-controller="tilt">
-                        <div class="icon icon-{{ feature.icon }}">{{ _self.icon(feature.icon) }}</div>
-                        <h3>{{ feature.title }}</h3>
-                        <p>{{ feature.text }}</p>
-                    </article>
-                {% endfor %}
+
+            <div class="bento">
+                {# Position et trajet #}
+                <article class="feature bento-wide" data-reveal data-controller="tilt">
+                    <div class="feature-visual visual-map" aria-hidden="true">
+                        <svg viewBox="-130 0 780 180" preserveAspectRatio="xMidYMid slice">
+                            <rect x="-130" width="780" height="180" fill="#EEF5F0"/>
+                            <rect x="-130" width="780" height="180" fill="url(#grass)" opacity=".7"/>
+                            <path d="M-140 150 C120 120 220 170 330 140 S470 110 660 130" fill="none" stroke="#CFE1D6" stroke-width="1.2"/>
+                            <polygon class="mini-fence" points="70,30 330,22 400,110 250,160 50,130"/>
+                            <path class="mini-track" pathLength="1" d="M120 100 C150 60 210 50 230 85 S280 140 310 105 S330 50 280 45 S190 60 170 95 S220 140 290 135"/>
+                            <circle class="mini-dot" cx="290" cy="135" r="6"/>
+                        </svg>
+                        <span class="visual-tag">{{ ui.icon('route') }} 3,2 km aujourd'hui</span>
+                    </div>
+                    <div class="feature-body">
+                        <div class="icon">{{ ui.icon('pin') }}</div>
+                        <div>
+                            <h3>Position et trajet</h3>
+                            <p>Position GPS actuelle, trajet de la journée et distance parcourue, sur une carte du pré.</p>
+                        </div>
+                    </div>
+                </article>
+
+                {# Climat sous la couverture #}
+                <article class="feature" data-reveal data-controller="tilt">
+                    <div class="feature-visual visual-climate" aria-hidden="true">
+                        <div class="climate-reading">
+                            <strong>27,4<small>°C</small></strong>
+                            <span>61 % d'humidité</span>
+                        </div>
+                        <div class="climate-scale">
+                            <span class="zone cold">Froid</span><span class="zone ok">Confort</span><span class="zone hot">Chaud</span>
+                            <i class="needle"></i>
+                        </div>
+                    </div>
+                    <div class="feature-body">
+                        <div class="icon">{{ ui.icon('thermo') }}</div>
+                        <div>
+                            <h3>Climat sous la couverture</h3>
+                            <p>Température et humidité au contact du cheval, comparées à la météo locale.</p>
+                        </div>
+                    </div>
+                </article>
+
+                {# Allures #}
+                <article class="feature" data-reveal data-controller="tilt">
+                    <div class="feature-visual visual-gaits" aria-hidden="true">
+                        {% for gait in [{n: 'Couché', h: 34, c: 'couche'}, {n: 'Repos', h: 58, c: 'repos'}, {n: 'Pas', h: 92, c: 'pas'}, {n: 'Trot', h: 46, c: 'trot'}, {n: 'Galop', h: 18, c: 'galop'}] %}
+                            <div class="gait-col"><span class="bar g-{{ gait.c }}" style="--h: {{ gait.h }}%"></span><small>{{ gait.n }}</small></div>
+                        {% endfor %}
+                    </div>
+                    <div class="feature-body">
+                        <div class="icon">{{ ui.icon('activity') }}</div>
+                        <div>
+                            <h3>Allures et comportement</h3>
+                            <p>Pas, trot, galop, repos, cheval couché, roulades : la centrale inertielle reconnaît chaque allure.</p>
+                        </div>
+                    </div>
+                </article>
+
+                {# Activité inhabituelle #}
+                <article class="feature" data-reveal data-controller="tilt">
+                    <div class="feature-visual visual-anomaly" aria-hidden="true">
+                        <svg viewBox="0 0 300 120" preserveAspectRatio="none">
+                            <rect class="habit" x="0" y="52" width="300" height="34" rx="4"/>
+                            <polyline class="spark" pathLength="1" points="0,74 22,68 44,72 66,64 88,70 110,62 132,68 154,66 176,71 198,60 214,24 230,66 252,70 274,64 300,68"/>
+                            <circle class="spike" cx="214" cy="24" r="5"/>
+                        </svg>
+                        <span class="visual-tag visual-tag-alert">Agitation inhabituelle</span>
+                    </div>
+                    <div class="feature-body">
+                        <div class="icon">{{ ui.icon('bell') }}</div>
+                        <div>
+                            <h3>Activité inhabituelle</h3>
+                            <p>Equitrack apprend les habitudes de votre cheval et signale l'agitation, l'immobilité ou les roulades répétées.</p>
+                        </div>
+                    </div>
+                </article>
+
+                {# Sortie d'enclos #}
+                <article class="feature" data-reveal data-controller="tilt">
+                    <div class="feature-visual visual-notify" aria-hidden="true">
+                        <div class="notif notif-back"></div>
+                        <div class="notif">
+                            <span class="notif-app">{{ include('_partials/_horseshoe.html.twig', {class: 'notif-shoe', stroke: 7}) }}</span>
+                            <span><strong>Sortie d'enclos</strong><small>Tornade a quitté son pré · à l'instant</small></span>
+                        </div>
+                    </div>
+                    <div class="feature-body">
+                        <div class="icon">{{ ui.icon('fence') }}</div>
+                        <div>
+                            <h3>Sortie d'enclos</h3>
+                            <p>Tracez l'enclos sur la carte : vous êtes prévenu dès que le cheval en sort.</p>
+                        </div>
+                    </div>
+                </article>
+
+                {# Conseil de couverture #}
+                <article class="feature feature-dark bento-full" data-reveal>
+                    <div class="feature-body">
+                        <div class="icon">{{ ui.icon('blanket') }}</div>
+                        <div>
+                            <h3>Conseil de couverture</h3>
+                            <p>Chaque jour, la bonne couverture selon la météo, la tonte, le profil du cheval et ce qui est mesuré dessous.</p>
+                        </div>
+                    </div>
+                    <div class="advice-demo" aria-hidden="true">
+                        <div class="advice-step"><span>{{ ui.icon('cloud') }}</span><small>Cette nuit</small><strong>2 °C · pluie 70 %</strong></div>
+                        <span class="advice-plus">+</span>
+                        <div class="advice-step"><span>{{ ui.icon('thermo') }}</span><small>Sous la couverture</small><strong>24,1 °C</strong></div>
+                        <span class="advice-plus">=</span>
+                        <div class="advice-step advice-result"><span>{{ ui.icon('blanket') }}</span><small>Conseil</small><strong>Imperméable 150 g</strong></div>
+                    </div>
+                </article>
             </div>
         </div>
     </section>
 
     {# ---------- Fonctionnement ---------- #}
     <section class="band" id="fonctionnement">
+        <svg class="band-contours" viewBox="0 0 1440 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+            {% for i in 0..5 %}
+                <path d="M-40 {{ 40 + i * 64 }} C 300 {{ i * 64 - 10 }}, 520 {{ 110 + i * 60 }}, 820 {{ 50 + i * 62 }} S 1200 {{ i * 66 }}, 1480 {{ 70 + i * 60 }}"/>
+            {% endfor %}
+        </svg>
         <div class="container">
             <div class="section-head" data-reveal>
                 <p class="eyebrow">Fonctionnement</p>
                 <h2>Du poitrail du cheval à votre téléphone</h2>
             </div>
-            <div class="steps-wrap">
-                <div class="grid grid-3 steps">
-                    <div class="step" data-reveal>
-                        <div class="step-icon">{{ _self.icon('chip') }}</div>
-                        <h3>Le boîtier mesure</h3>
-                        <p>Fixé dans une poche de la couverture, il enregistre en continu les mouvements, la position, la température et l'humidité. Le brut reste sur sa carte microSD.</p>
-                    </div>
-                    <div class="step" data-reveal>
-                        <div class="step-icon step-icon-signal">{{ _self.icon('signal') }}</div>
-                        <h3>Le réseau transmet</h3>
-                        <p>Toutes les 10 minutes, un résumé part par le réseau mobile LTE-M. En cas d'alerte, l'envoi est immédiat.</p>
-                    </div>
-                    <div class="step" data-reveal>
-                        <div class="step-icon">{{ _self.icon('spark') }}</div>
-                        <h3>Equitrack interprète</h3>
-                        <p>La plateforme compare les mesures aux habitudes du cheval et à la météo, puis vous alerte et vous conseille.</p>
-                    </div>
-                </div>
-            </div>
+            <ol class="flow">
+                <li class="flow-step" data-reveal>
+                    <div class="flow-node">{{ ui.icon('chip') }}</div>
+                    <span class="flow-num">01</span>
+                    <h3>Le boîtier mesure</h3>
+                    <p>Fixé dans une poche de la couverture, il enregistre en continu les mouvements, la position, la température et l'humidité. Le brut reste sur sa carte microSD.</p>
+                </li>
+                <li class="flow-step" data-reveal>
+                    <div class="flow-node step-icon-signal">{{ ui.icon('signal') }}</div>
+                    <span class="flow-num">02</span>
+                    <h3>Le réseau transmet</h3>
+                    <p>Toutes les 10 minutes, un résumé part par le réseau mobile LTE-M. En cas d'alerte, l'envoi est immédiat.</p>
+                </li>
+                <li class="flow-step" data-reveal>
+                    <div class="flow-node">{{ ui.icon('spark') }}</div>
+                    <span class="flow-num">03</span>
+                    <h3>Equitrack interprète</h3>
+                    <p>La plateforme compare les mesures aux habitudes du cheval et à la météo, puis vous alerte et vous conseille.</p>
+                </li>
+            </ol>
         </div>
     </section>
 
     {# ---------- Appel à l'action ---------- #}
-    <section class="section cta">
-        <div class="container" data-reveal>
-            {{ include('_partials/_horseshoe.html.twig', {class: 'cta-shoe', stroke: 4}) }}
-            <h2>Equitrack alerte, il ne diagnostique pas</h2>
-            <p>Au moindre doute sur la santé de votre cheval, appelez votre vétérinaire.<br>L'historique d'Equitrack peut l'aider dans son examen.</p>
-            {% if not app.user %}
-                <a class="btn btn-primary" data-controller="magnetic" href="{{ path('app_register') }}">Commencer le suivi <span class="arrow" aria-hidden="true">→</span></a>
-            {% endif %}
-            <div class="cta-contact">
-                <p class="eyebrow">Une question, un essai dans votre écurie&nbsp;?</p>
-                {{ include('_partials/_socials.html.twig', {class: 'socials-light'}) }}
+    <section class="section">
+        <div class="container">
+            <div class="cta-panel" data-reveal>
+                {{ include('_partials/_horseshoe.html.twig', {class: 'cta-watermark', stroke: 2}) }}
+                <div class="cta-copy">
+                    <p class="eyebrow">{{ ui.icon('shield') }} À retenir</p>
+                    <h2>Equitrack alerte, il ne diagnostique pas</h2>
+                    <p>Au moindre doute sur la santé de votre cheval, appelez votre vétérinaire. L'historique d'Equitrack peut l'aider dans son examen.</p>
+                    {% if not app.user %}
+                        <a class="btn btn-light" data-controller="magnetic" href="{{ path('app_register') }}">Commencer le suivi <span class="arrow" aria-hidden="true">→</span></a>
+                    {% endif %}
+                </div>
+                <div class="cta-contact">
+                    <p class="eyebrow">Une question, un essai dans votre écurie&nbsp;?</p>
+                    {{ include('_partials/_socials.html.twig') }}
+                </div>
             </div>
         </div>
     </section>
