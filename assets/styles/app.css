@@ -507,6 +507,8 @@ input:focus, select:focus { outline: none; border-color: var(--sage); box-shadow
     box-shadow: 0 10px 24px -12px rgb(30 58 47 / 60%);
 }
 .hotspot-label::before { content: ''; position: absolute; left: -16px; bottom: -14px; width: 26px; height: 2px; background: var(--forest); transform: rotate(-58deg); transform-origin: right; }
+.hotspot.is-left .hotspot-label { left: auto; right: 22px; }
+.hotspot.is-left .hotspot-label::before { left: auto; right: -16px; transform: rotate(58deg); transform-origin: left; }
 
 .showcase-nav { position: absolute; left: 0; right: 0; bottom: 28px; }
 .showcase-dots { list-style: none; display: flex; gap: 18px; padding: 0; margin: 0 0 12px; font-size: .78rem; color: var(--muted); flex-wrap: wrap; }

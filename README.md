@@ -51,7 +51,7 @@ Content-Type: application/json
     {
       "recordedAt": "2026-11-10T14:30:00+01:00",
       "latitude": 44.0560, "longitude": 1.4285,
-      "temperature": 27.8,        // °C sous la couverture (SHT41)
+      "temperature": 27.8,        // °C sous la couverture (sonde SHT35)
       "humidity": 61,             // % HR sous la couverture
       "outsideTemperature": 9.5,  // °C extérieur (DS18B20)
       "activity": 24,             // indice 0–100 calculé par le boîtier

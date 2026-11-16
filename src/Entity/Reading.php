@@ -32,11 +32,11 @@ class Reading
     #[ORM\Column(nullable: true)]
     private ?float $longitude = null;
 
-    /** Température sous la couverture, °C (SHT41). */
+    /** Température sous la couverture, °C (sonde SHT35 sur câble). */
     #[ORM\Column(nullable: true)]
     private ?float $temperature = null;
 
-    /** Humidité relative sous la couverture, % (SHT41). */
+    /** Humidité relative sous la couverture, % (sonde SHT35 sur câble). */
     #[ORM\Column(nullable: true)]
     private ?float $humidity = null;
 

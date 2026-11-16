@@ -4,7 +4,15 @@ import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment
 import { buildDevice, buildHeat, buildWaves, COLORS } from '../device3d/device_model.js';
 import { gsap, reduceMotion, ScrollTrigger } from '../motion.js';
 
-const FOCUS_KEYS = ['gnss', 'imu', 'sd', 'climate', 'lte', 'battery'];
+/** Pour chaque fonction mise en avant, les matériaux qui s'illuminent. */
+const GLOW = {
+    gnss: ['gnss'],
+    imu: ['imu'],
+    sd: ['sd'],
+    climate: ['climate', 'outside'],
+    lte: ['lte', 'lteAntenna', 'sim'],
+    battery: ['battery'],
+};
 
 /*
  * Le boîtier en 3D, piloté par le défilement : il tourne, s'ouvre en vue éclatée,
@@ -24,7 +32,7 @@ export default class extends Controller {
         }
 
         this.state = {
-            yaw: -0.75, pitch: 0.42, camDistance: 29, explode: 0, lidAway: 0, lookY: 0,
+            yaw: -0.75, pitch: 0.42, camDistance: 29, explode: 0, lidAway: 0, lookY: 0, offsetX: 0,
             gnss: 0, imu: 0, sd: 0, climate: 0, lte: 0, battery: 0,
         };
         this.pointer = { x: 0, y: 0, tx: 0, ty: 0 };
@@ -103,15 +111,16 @@ export default class extends Controller {
 
         const ground = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), new THREE.ShadowMaterial({ opacity: 0.16 }));
         ground.rotation.x = -Math.PI / 2;
-        ground.position.y = -4.8;
+        // Assez bas pour ne jamais masquer les sondes du fond en vue éclatée.
+        ground.position.y = -6.8;
         ground.receiveShadow = true;
         this.scene.add(ground);
 
         this.device = buildDevice();
         this.scene.add(this.device.root);
 
-        this.gnssWaves = buildWaves(4, COLORS.sage, false);
-        this.lteWaves = buildWaves(4, COLORS.forest, true);
+        this.gnssWaves = buildWaves(4, COLORS.sage);
+        this.lteWaves = buildWaves(4, COLORS.forest);
         this.heat = buildHeat();
         this.scene.add(this.gnssWaves, this.lteWaves, this.heat);
     }
@@ -184,21 +193,22 @@ export default class extends Controller {
             .to(s, { yaw: 0.55, duration: 1 }, 0)
             // 1 · vue éclatée
             .to(s, { explode: 1, yaw: -0.35, pitch: 0.55, camDistance: 33, lookY: 0.2, duration: 0.9 }, 1)
-            // 2 · GPS : le couvercle s'efface vers l'arrière, vue plongeante sur l'antenne patch
-            .to(s, { yaw: -0.05, pitch: 0.95, camDistance: 31, lidAway: 1 }, 2);
+            // 2 · GPS : le couvercle s'ouvre comme un capot et montre l'antenne collée dessous
+            .to(s, { yaw: -0.15, pitch: 0.45, camDistance: 35, lookY: 1.6, lidAway: 1 }, 2);
         focus('gnss', 2.1);
-        // 3 · mouvements : l'IMU et la microSD
-        this.timeline.to(s, { yaw: 0.4, pitch: 0.62, camDistance: 31 }, 3);
+        // 3 · mouvements : la centrale inertielle et la microSD
+        this.timeline.to(s, { yaw: 0.4, pitch: 0.7, camDistance: 32, lookY: 0.6 }, 3);
         focus('imu', 3.1);
         focus('sd', 3.1);
-        // 4 · climat : la fenêtre du SHT41 et la sonde extérieure
-        this.timeline.to(s, { yaw: 0.85, pitch: 0.5 }, 4);
+        // 4 · climat : on tourne le côté des sondes vers nous (lacet négatif = extrémité droite en avant)
+        // Les sondes dépassent à droite : on décale le boîtier vers la gauche le temps du chapitre.
+        this.timeline.to(s, { yaw: -0.45, pitch: 0.35, lookY: -1.4, camDistance: 35, offsetX: -3 }, 4);
         focus('climate', 4.1);
-        // 5 · LTE-M
-        this.timeline.to(s, { yaw: -0.65, pitch: 0.58 }, 5);
+        // 5 · LTE-M : le modem, la carte SIM et l'antenne souple du couvercle
+        this.timeline.to(s, { yaw: -0.5, pitch: 0.55, lookY: 0.8, offsetX: 0 }, 5);
         focus('lte', 5.1);
         // 6 · énergie : on écarte un peu plus pour bien voir la batterie
-        this.timeline.to(s, { yaw: 0.25, pitch: 0.3, explode: 1.3 }, 6);
+        this.timeline.to(s, { yaw: 0.25, pitch: 0.3, explode: 1.3, lookY: 0.4 }, 6);
         focus('battery', 6.1);
         // 7 · on referme et on fait un tour complet
         this.timeline
@@ -262,13 +272,14 @@ export default class extends Controller {
         root.rotation.x = this.pointer.y * 0.08;
         root.rotation.z = Math.sin(t * 9.5) * 0.05 * s.imu * calm;
         root.position.y = Math.sin(t * 1.1) * 0.08 * calm + Math.abs(Math.sin(t * 4.75)) * 0.25 * s.imu * calm;
+        root.position.x = s.offsetX;
 
         // Vue éclatée
         const e = s.explode;
-        // Couvercle soulevé, puis rabattu vers l'arrière comme un capot pour dégager la vue sur la carte.
+        // Couvercle soulevé, puis ouvert comme un capot : on voit les antennes collées dessous.
         const away = s.lidAway;
-        parts.lid.position.set(0, 3.3 * e + 1.2 * away, -6.2 * away);
-        parts.lid.rotation.set(0.55 * away, 0, -0.06 * e * (1 - away));
+        parts.lid.position.set(0, 3.3 * e + 1.4 * away, -4.8 * away);
+        parts.lid.rotation.set(-1.2 * away, 0, -0.06 * e * (1 - away));
         parts.gasket.position.y = 1.9 * e;
         parts.board.position.y = 0.95 * e;
         parts.board.children.forEach((child) => {
@@ -286,16 +297,16 @@ export default class extends Controller {
 
         // Composants mis en lumière
         const pulse = 0.75 + 0.25 * Math.sin(t * 4);
-        for (const key of FOCUS_KEYS) {
-            focusMaterials[key].emissiveIntensity = s[key] * 1.1 * pulse;
+        for (const [key, materials] of Object.entries(GLOW)) {
+            materials.forEach((name) => { focusMaterials[name].emissiveIntensity = s[key] * 1.1 * pulse; });
         }
-        parts.probe.material.emissiveIntensity = s.climate * 0.9 * pulse;
         parts.led.scale.setScalar(1 + 0.4 * Math.max(0, Math.sin(t * 3)));
 
         root.updateMatrixWorld(true);
-        this.animateWaves(this.gnssWaves, anchors.gnss, s.gnss, t, 0.5, 3.6, new THREE.Vector3(0, 0.4, 0));
+        this.gnssWaves.quaternion.copy(this.camera.quaternion);
+        this.animateWaves(this.gnssWaves, anchors.gnss, s.gnss, t, 0.5, 3.6);
         this.lteWaves.quaternion.copy(this.camera.quaternion);
-        this.animateWaves(this.lteWaves, anchors.lte, s.lte, t, 0.7, 5, new THREE.Vector3(0, 0.2, 0));
+        this.animateWaves(this.lteWaves, anchors.lteAntenna, s.lte, t, 0.7, 5);
         this.animateHeat(anchors.climate, s.climate, t);
 
         // Jauge de batterie qui se remplit en boucle
@@ -307,12 +318,12 @@ export default class extends Controller {
         this.placeHotspot();
     }
 
-    animateWaves(group, anchor, intensity, t, speed, maxScale, offset) {
+    animateWaves(group, anchor, intensity, t, speed, maxScale) {
         group.visible = intensity > 0.01;
         if (!group.visible) {
             return;
         }
-        anchor.getWorldPosition(group.position).add(offset);
+        anchor.getWorldPosition(group.position);
         group.children.forEach((ring) => {
             const phase = (t * speed + ring.userData.phase) % 1;
             ring.scale.setScalar(0.5 + phase * maxScale);
@@ -353,7 +364,10 @@ export default class extends Controller {
         }
         const point = anchor.getWorldPosition(new THREE.Vector3()).project(this.camera);
         const { width, height } = this.stageTarget.getBoundingClientRect();
-        this.hotspotTarget.style.transform = `translate(${(point.x * 0.5 + 0.5) * width}px, ${(-point.y * 0.5 + 0.5) * height}px)`;
+        const x = (point.x * 0.5 + 0.5) * width;
+        this.hotspotTarget.style.transform = `translate(${x}px, ${(-point.y * 0.5 + 0.5) * height}px)`;
+        // Près du bord droit, l'étiquette passe à gauche de son point pour rester lisible.
+        this.hotspotTarget.classList.toggle('is-left', x > width - 280);
         this.hotspotTarget.classList.add('is-visible');
     }
 }
