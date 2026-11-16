@@ -55,6 +55,10 @@ class Horse
     )]
     private array $paddock = [];
 
+    /** Fichier de la photo dans public/uploads/chevaux, déjà réduite (voir HorsePhotoStorage). */
+    #[ORM\Column(length: 64, nullable: true)]
+    private ?string $photo = null;
+
     #[ORM\ManyToOne(inversedBy: 'horses')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $owner = null;
@@ -213,5 +217,17 @@ class Horse
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
+    }
+
+    public function getPhoto(): ?string
+    {
+        return $this->photo;
+    }
+
+    public function setPhoto(?string $photo): static
+    {
+        $this->photo = $photo;
+
+        return $this;
     }
 }

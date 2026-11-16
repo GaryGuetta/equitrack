@@ -1,0 +1,8 @@
+{# Médaillon du cheval : sa photo si elle existe, sinon l'initiale de son nom. #}
+<span class="avatar{{ class is defined ? ' ' ~ class }}" aria-hidden="true">
+    {%- if horse.photo -%}
+        <img src="{{ asset('uploads/chevaux/' ~ horse.photo) }}" alt="" loading="lazy">
+    {%- else -%}
+        {{ (horse.name ?: '+')|first|upper }}
+    {%- endif -%}
+</span>

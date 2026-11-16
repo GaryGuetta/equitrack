@@ -57,6 +57,10 @@ class Reading
     #[ORM\Column(nullable: true)]
     private ?int $battery = null;
 
+    /** Ligne de la table Supabase « mesures » d'où vient la mesure, pour ne jamais l'importer deux fois. */
+    #[ORM\Column(type: 'bigint', unique: true, nullable: true)]
+    private ?int $sourceId = null;
+
     public function __construct(Horse $horse, \DateTimeImmutable $recordedAt)
     {
         $this->horse = $horse;
@@ -181,6 +185,18 @@ class Reading
     public function setBattery(?int $battery): static
     {
         $this->battery = $battery;
+
+        return $this;
+    }
+
+    public function getSourceId(): ?int
+    {
+        return $this->sourceId;
+    }
+
+    public function setSourceId(?int $sourceId): static
+    {
+        $this->sourceId = $sourceId;
 
         return $this;
     }

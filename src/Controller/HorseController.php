@@ -10,14 +10,18 @@ use App\Entity\Reading;
 use App\Entity\User;
 use App\Form\HorseType;
 use App\Geo\GeoMath;
+use App\Media\HorsePhotoStorage;
 use App\Monitoring\DaySummary;
 use App\Monitoring\TimeSeries;
 use App\Repository\AlertRepository;
+use App\Repository\DeviceRepository;
 use App\Repository\ReadingRepository;
 use App\Security\HorseVoter;
 use App\Weather\WeatherProvider;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -38,13 +42,14 @@ final class HorseController extends AbstractController
     ];
 
     #[Route('/nouveau', name: 'app_horse_new', methods: ['GET', 'POST'])]
-    public function new(#[CurrentUser] User $user, Request $request, EntityManagerInterface $em): Response
+    public function new(#[CurrentUser] User $user, Request $request, EntityManagerInterface $em, HorsePhotoStorage $photos): Response
     {
         $horse = (new Horse())->setOwner($user);
         $form = $this->createForm(HorseType::class, $horse);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            self::applyPhoto($form, $horse, $photos);
             $em->persist($horse);
             $em->flush();
             $this->addFlash('success', \sprintf('%s a été ajouté. Associez-lui un boîtier pour recevoir ses données.', $horse->getName()));
@@ -98,12 +103,13 @@ final class HorseController extends AbstractController
 
     #[Route('/{id}/modifier', name: 'app_horse_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
     #[IsGranted(HorseVoter::MANAGE, 'horse')]
-    public function edit(Horse $horse, Request $request, EntityManagerInterface $em): Response
+    public function edit(Horse $horse, Request $request, EntityManagerInterface $em, HorsePhotoStorage $photos): Response
     {
         $form = $this->createForm(HorseType::class, $horse);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            self::applyPhoto($form, $horse, $photos);
             $em->flush();
             $this->addFlash('success', 'Fiche mise à jour.');
 
@@ -116,13 +122,14 @@ final class HorseController extends AbstractController
     #[Route('/{id}/supprimer', name: 'app_horse_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
     #[IsGranted(HorseVoter::MANAGE, 'horse')]
     #[IsCsrfTokenValid('submit')]
-    public function delete(Horse $horse, EntityManagerInterface $em): Response
+    public function delete(Horse $horse, EntityManagerInterface $em, HorsePhotoStorage $photos): Response
     {
         // Suppression explicite : SQLite n'applique pas toujours les ON DELETE CASCADE.
         foreach ([Reading::class, Alert::class] as $class) {
             $em->createQuery("DELETE FROM $class x WHERE x.horse = :horse")->setParameter('horse', $horse)->execute();
         }
         $horse->getDevice()?->setHorse(null);
+        $photos->remove($horse);
         $em->remove($horse);
         $em->flush();
 
@@ -151,6 +158,49 @@ final class HorseController extends AbstractController
         $em->flush();
 
         $this->addFlash('device_token', $token);
+
+        return $this->redirectToRoute('app_horse_show', ['id' => $horse->getId(), '_fragment' => 'boitier']);
+    }
+
+    private static function applyPhoto(FormInterface $form, Horse $horse, HorsePhotoStorage $photos): void
+    {
+        $file = $form->get('photoFile')->getData();
+        if ($file instanceof UploadedFile) {
+            $photos->store($horse, $file);
+        } elseif ($form->get('removePhoto')->getData()) {
+            $photos->remove($horse);
+        }
+    }
+
+    /**
+     * Relie le cheval au boîtier qui écrit dans Supabase sous ce numéro (colonne horse_id de « mesures »).
+     */
+    #[Route('/{id}/boitier/numero', name: 'app_horse_device_serial', requirements: ['id' => '\d+'], methods: ['POST'])]
+    #[IsGranted(HorseVoter::MANAGE, 'horse')]
+    #[IsCsrfTokenValid('submit')]
+    public function deviceSerial(Horse $horse, Request $request, DeviceRepository $devices, EntityManagerInterface $em): Response
+    {
+        $serial = trim($request->request->getString('serial'));
+        $device = $horse->getDevice();
+        $owner = $devices->findOneBy(['serial' => $serial]);
+
+        if (!preg_match('/^[A-Za-z0-9_.-]{1,32}$/', $serial)) {
+            $this->addFlash('error', 'Numéro de boîtier invalide : lettres, chiffres, « - », « _ » ou « . », 32 caractères au plus.');
+        } elseif (null !== $owner && $owner !== $device) {
+            $this->addFlash('error', \sprintf('Le boîtier %s est déjà associé à un autre cheval.', $serial));
+        } else {
+            if (null === $device) {
+                $token = Device::generateToken();
+                $device = new Device($serial, $token);
+                $horse->setDevice($device);
+                $em->persist($device);
+                $this->addFlash('device_token', $token);
+            } else {
+                $device->setSerial($serial);
+            }
+            $em->flush();
+            $this->addFlash('success', \sprintf('Boîtier %s associé : ses mesures Supabase arrivent sur la fiche.', $serial));
+        }
 
         return $this->redirectToRoute('app_horse_show', ['id' => $horse->getId(), '_fragment' => 'boitier']);
     }

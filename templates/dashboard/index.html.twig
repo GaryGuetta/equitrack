@@ -34,7 +34,7 @@
                 {% set status = alertsCount > 0 ? 'alert' : (horse.device is null ? 'none' : (horse.device.silent ? 'offline' : 'ok')) %}
                 <a class="card horse-card is-{{ status }}" href="{{ path('app_horse_show', {id: horse.id}) }}" data-reveal data-controller="tilt">
                     <header>
-                        <span class="avatar" aria-hidden="true">{{ horse.name|first|upper }}</span>
+                        {{ include('_partials/_avatar.html.twig') }}
                         <div>
                             <h3>{{ horse.name }}</h3>
                             <span class="muted">{{ horse.breed ?? 'Race non renseignée' }}{% if horse.age %} · {{ horse.age }} ans{% endif %}</span>

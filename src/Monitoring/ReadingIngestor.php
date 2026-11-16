@@ -29,17 +29,26 @@ class ReadingIngestor
     {
         $horse = $device->getHorse() ?? throw new \LogicException('Ce boîtier n\'est associé à aucun cheval.');
 
-        $inputs = $batch->readings;
-        usort($inputs, static fn (ReadingInput $a, ReadingInput $b) => $a->recordedAt <=> $b->recordedAt);
+        return $this->record($device, array_map(fn (ReadingInput $input) => $this->toReading($horse, $input), $batch->readings));
+    }
 
-        $readings = [];
-        foreach ($inputs as $input) {
-            $reading = $this->toReading($horse, $input);
+    /**
+     * Enregistre des mesures déjà construites (API ou import Supabase), puis évalue les alertes.
+     *
+     * @param list<Reading> $readings mesures du cheval associé au boîtier
+     *
+     * @return list<Alert>
+     */
+    public function record(Device $device, array $readings): array
+    {
+        $horse = $device->getHorse() ?? throw new \LogicException('Ce boîtier n\'est associé à aucun cheval.');
+
+        usort($readings, static fn (Reading $a, Reading $b) => $a->getRecordedAt() <=> $b->getRecordedAt());
+        foreach ($readings as $reading) {
             $this->em->persist($reading);
-            $readings[] = $reading;
         }
 
-        $device->markSeen(new \DateTimeImmutable(), $inputs[array_key_last($inputs)]->battery);
+        $device->markSeen(new \DateTimeImmutable(), $readings[array_key_last($readings)]->getBattery());
         $this->em->flush();
 
         $alerts = $this->evaluator->evaluate($horse, $readings);

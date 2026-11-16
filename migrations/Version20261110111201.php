@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DoctrineMigrations;
 
+use Doctrine\DBAL\Platforms\SQLitePlatform;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
@@ -19,6 +20,8 @@ final class Version20261110111201 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
+        $this->skipIf(!$this->platform instanceof SQLitePlatform, 'Migration SQLite : sur PostgreSQL, le schéma est créé par Version20261116120000.');
+
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('CREATE TABLE alert (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, type VARCHAR(255) NOT NULL, severity VARCHAR(255) NOT NULL, message VARCHAR(255) NOT NULL, triggered_at DATETIME NOT NULL, created_at DATETIME NOT NULL, acknowledged_at DATETIME DEFAULT NULL, horse_id INTEGER NOT NULL, CONSTRAINT FK_17FD46C176B275AD FOREIGN KEY (horse_id) REFERENCES horse (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE)');
         $this->addSql('CREATE INDEX alert_horse_open_idx ON alert (horse_id, acknowledged_at)');
@@ -40,6 +43,8 @@ final class Version20261110111201 extends AbstractMigration
 
     public function down(Schema $schema): void
     {
+        $this->skipIf(!$this->platform instanceof SQLitePlatform, 'Migration SQLite.');
+
         // this down() migration is auto-generated, please modify it to your needs
         $this->addSql('DROP TABLE alert');
         $this->addSql('DROP TABLE device');

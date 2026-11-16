@@ -9,7 +9,7 @@
     <div class="container page">
         <div class="page-head">
             <div class="page-title">
-                <span class="avatar avatar-lg" aria-hidden="true">{{ horse.name|first|upper }}</span>
+                {{ include('_partials/_avatar.html.twig', {class: 'avatar-lg'}) }}
                 <div>
                     <p class="eyebrow"><a href="{{ path('app_dashboard') }}">Mes chevaux</a> / Fiche</p>
                     <h1>{{ horse.name }}</h1>
@@ -203,6 +203,14 @@
                           {% if device %}onsubmit="return confirm('L\'ancien jeton cessera de fonctionner. Continuer ?')"{% endif %}>
                         <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
                         <button class="btn btn-ghost btn-sm" type="submit">{{ device ? 'Régénérer le jeton' : 'Associer un boîtier' }}</button>
+                    </form>
+                    <form method="post" action="{{ path('app_horse_device_serial', {id: horse.id}) }}" class="serial-form">
+                        <input type="hidden" name="_token" data-controller="csrf-protection" value="{{ csrf_token('submit') }}">
+                        <label for="device-serial">Numéro dans Supabase <span class="muted">(colonne horse_id)</span></label>
+                        <div class="serial-row">
+                            <input id="device-serial" type="text" name="serial" required maxlength="32" pattern="[A-Za-z0-9_.\-]+" placeholder="cheval-01" value="{{ device ? device.serial }}">
+                            <button class="btn btn-ghost btn-sm" type="submit">Relier</button>
+                        </div>
                     </form>
                 </section>
             </aside>

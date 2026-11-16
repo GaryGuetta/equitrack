@@ -118,6 +118,32 @@ final class WebPagesTest extends WebTestCase
         self::assertSame($this->owner->getId(), $caramel->getOwner()->getId());
     }
 
+    public function testHorsePhotoIsShrunkThenRemoved(): void
+    {
+        $jpeg = tempnam(sys_get_temp_dir(), 'cheval').'.jpg';
+        imagejpeg(imagecreatetruecolor(2000, 1000), $jpeg);
+
+        $this->client->loginUser($this->owner);
+        $this->client->request('GET', '/chevaux/'.$this->horse->getId().'/modifier');
+        $this->client->submitForm('Enregistrer', ['horse[photoFile]' => $jpeg]);
+        self::assertResponseRedirects();
+
+        $photo = $this->em->getRepository(Horse::class)->find($this->horse->getId())->getPhoto();
+        $path = self::getContainer()->getParameter('kernel.project_dir').'/public/uploads/chevaux/'.$photo;
+        self::assertStringEndsWith('.webp', $photo);
+        self::assertSame([800, 400], \array_slice(getimagesize($path), 0, 2));
+
+        $this->client->request('GET', '/chevaux/'.$this->horse->getId());
+        self::assertSelectorExists('.avatar img[src$="'.$photo.'"]');
+
+        $this->client->request('GET', '/chevaux/'.$this->horse->getId().'/modifier');
+        $this->client->submitForm('Enregistrer', ['horse[removePhoto]' => true]);
+        $this->em->clear();
+        self::assertNull($this->em->getRepository(Horse::class)->find($this->horse->getId())->getPhoto());
+        self::assertFileDoesNotExist($path);
+        unlink($jpeg);
+    }
+
     public function testPaddockNeedsThreePoints(): void
     {
         $this->client->loginUser($this->owner);

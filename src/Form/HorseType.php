@@ -9,11 +9,13 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\CallbackTransformer;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Image;
 
 class HorseType extends AbstractType
 {
@@ -40,6 +42,24 @@ class HorseType extends AbstractType
             ])
             ->add('hasShelter', CheckboxType::class, [
                 'label' => 'Abri disponible au pré',
+                'required' => false,
+            ])
+            ->add('photoFile', FileType::class, [
+                'label' => 'Photo',
+                'mapped' => false,
+                'required' => false,
+                'help' => 'JPEG, PNG ou WebP, 10 Mo au plus. Elle est réduite avant d\'être enregistrée.',
+                'attr' => ['accept' => 'image/jpeg,image/png,image/webp'],
+                'constraints' => [new Image(
+                    maxSize: '10M',
+                    mimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
+                    mimeTypesMessage: 'Choisissez une photo JPEG, PNG ou WebP.',
+                    maxSizeMessage: 'Photo trop lourde : 10 Mo au plus.',
+                )],
+            ])
+            ->add('removePhoto', CheckboxType::class, [
+                'label' => 'Retirer la photo',
+                'mapped' => false,
                 'required' => false,
             ])
             ->add('paddock', HiddenType::class, [

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DoctrineMigrations;
 
+use Doctrine\DBAL\Platforms\SQLitePlatform;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
@@ -19,6 +20,8 @@ final class Version20261116094020 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
+        $this->skipIf(!$this->platform instanceof SQLitePlatform, 'Migration SQLite : sur PostgreSQL, le schéma est créé par Version20261116120000.');
+
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql(<<<'SQL'
             CREATE TEMPORARY TABLE __temp__reading AS
@@ -88,6 +91,8 @@ final class Version20261116094020 extends AbstractMigration
 
     public function down(Schema $schema): void
     {
+        $this->skipIf(!$this->platform instanceof SQLitePlatform, 'Migration SQLite.');
+
         // this down() migration is auto-generated, please modify it to your needs
         $this->addSql('ALTER TABLE reading ADD COLUMN outside_temperature DOUBLE PRECISION DEFAULT NULL');
     }

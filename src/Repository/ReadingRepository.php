@@ -115,4 +115,17 @@ class ReadingRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleScalarResult();
     }
+
+    /**
+     * @return int nombre de mesures supprimées
+     */
+    public function deleteOlderThan(\DateTimeImmutable $before): int
+    {
+        return $this->createQueryBuilder('r')
+            ->delete()
+            ->andWhere('r.recordedAt < :before')
+            ->setParameter('before', $before)
+            ->getQuery()
+            ->execute();
+    }
 }

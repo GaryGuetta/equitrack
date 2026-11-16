@@ -34,6 +34,13 @@
 
             <section class="card">
                 <h2>Profil</h2>
+                <div class="photo-field">
+                    {{ include('_partials/_avatar.html.twig', {class: 'avatar-lg'}) }}
+                    <div>
+                        {{ form_row(form.photoFile) }}
+                        {% if horse.photo %}{{ form_row(form.removePhoto) }}{% else %}{% do form.removePhoto.setRendered %}{% endif %}
+                    </div>
+                </div>
                 {{ form_row(form.name) }}
                 <div class="form-grid">
                     {{ form_row(form.breed) }}

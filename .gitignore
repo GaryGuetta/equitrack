@@ -18,3 +18,7 @@
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
+
+###> photos des chevaux ###
+/public/uploads/
+###< photos des chevaux ###

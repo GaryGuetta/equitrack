@@ -58,6 +58,14 @@ class Device implements UserInterface
         return hash('sha256', $plainToken);
     }
 
+    /**
+     * Le numéro doit être celui que le boîtier écrit dans la colonne horse_id de Supabase.
+     */
+    public function setSerial(string $serial): void
+    {
+        $this->serial = $serial;
+    }
+
     public function rotateToken(string $plainToken): void
     {
         $this->tokenHash = self::hashToken($plainToken);
