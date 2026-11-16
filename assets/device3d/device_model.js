@@ -4,9 +4,9 @@
  *   batterie lithium clipsée dessous, carte SIM et microSD dans leurs logements ;
  * - antennes GPS (patch actif) et LTE-M (souple) collées sous le couvercle ;
  * - petite carte centrale inertielle posée sur entretoises ;
- * - deux sondes sur câble : température + humidité (sous la couverture) et température extérieure.
+ * - une sonde température + humidité sur câble, sous la couverture (l'extérieur vient de la météo).
  *
- * Unité : 1 = 10 mm. Boîtier ≈ 126 × 30 × 46 mm (x = longueur, y = épaisseur, z = largeur).
+ * Unité : 1 = 10 mm. Boîtier ≈ 126 × 35 × 46 mm (x = longueur, y = épaisseur, z = largeur).
  */
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
@@ -135,27 +135,31 @@ export function buildDevice() {
         lteAntenna: glowing(0xd98a2b, COLORS.amber, { roughness: 0.4, clearcoat: 1, transparent: true, opacity: 0.92 }),
         sim: glowing(0xf2f0ea, COLORS.sage, { roughness: 0.5 }),
         battery: glowing(0x3f7d63, COLORS.sage, { roughness: 0.4, clearcoat: 0.8 }),
-        outside: glowing(0xc9cdd0, COLORS.amber, { metalness: 1, roughness: 0.32 }),
     };
 
-    // ---------- Fond du boîtier, ports et sondes ----------
+    // ---------- Fond du boîtier : bac creux, port USB-C et sonde ----------
     const bottom = new THREE.Group();
-    bottom.add(mesh(pillow(LENGTH, 1.9, WIDTH, 0.55, 0.32), shell, [0, -0.55, 0]));
+    bottom.add(mesh(pillow(LENGTH, 0.9, WIDTH, 0.55, 0.3), shell, [0, -1.55, 0])); // fond
+    // Parois : anneau arrondi extrudé, même contour extérieur que le fond.
+    const wallShape = roundedRectShape(LENGTH, WIDTH, 0.85);
+    wallShape.holes.push(roundedRectShape(LENGTH - 0.5, WIDTH - 0.5, 0.6));
+    const wallGeometry = new THREE.ExtrudeGeometry(wallShape, { depth: 1.66, bevelEnabled: true, bevelThickness: 0.04, bevelSize: 0.03, bevelSegments: 2, curveSegments: 18 });
+    wallGeometry.rotateX(-Math.PI / 2);
+    bottom.add(mesh(wallGeometry, shell, [0, -1.3, 0]));
+    // Fûts de vis dans les coins, pour fermer le couvercle
+    for (const [x, z] of [[-1, -1], [-1, 1], [1, -1], [1, 1]]) {
+        const at = [x * (LENGTH / 2 - 0.55), z * (WIDTH / 2 - 0.55)];
+        bottom.add(mesh(new THREE.CylinderGeometry(0.24, 0.28, 1.3, 24), shell, [at[0], -0.45, at[1]]));
+        bottom.add(mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.02, 16), black, [at[0], 0.21, at[1]]));
+    }
     bottom.add(mesh(new RoundedBoxGeometry(0.14, 0.34, 0.95, 3, 0.06), black, [-LENGTH / 2 - 0.02, -0.25, 0]));
 
-    for (const z of [1.0, -1.0]) {
-        const gland = mesh(new THREE.CylinderGeometry(0.3, 0.34, 0.4, 32), darkMetal, [LENGTH / 2 + 0.15, -0.5, z]);
-        gland.rotation.z = Math.PI / 2;
-        bottom.add(gland);
-    }
-
-    // Sonde extérieure étanche : capsule inox, côté extérieur de la couverture.
-    const outside = probeOnCable([[LENGTH / 2 + 0.3, -0.5, 1.0], [LENGTH / 2 + 1.2, -0.7, 1.4], [LENGTH / 2 + 1.7, -1.5, 2.1], [LENGTH / 2 + 1.6, -2.3, 2.7]], black);
-    outside.tip.add(mesh(new THREE.CapsuleGeometry(0.15, 0.8, 8, 16), focusMaterials.outside, [0, 0.45, 0]));
-    bottom.add(outside.cable, outside.tip);
+    const gland = mesh(new THREE.CylinderGeometry(0.3, 0.34, 0.4, 32), darkMetal, [LENGTH / 2 + 0.15, -0.5, 0]);
+    gland.rotation.z = Math.PI / 2;
+    bottom.add(gland);
 
     // Sonde température + humidité : corps noir et filtre fritté, déportée contre le cheval.
-    const climate = probeOnCable([[LENGTH / 2 + 0.3, -0.5, -1.0], [LENGTH / 2 + 1.2, -0.8, -1.2], [LENGTH / 2 + 1.9, -1.4, -0.6], [LENGTH / 2 + 2.3, -2.0, 0.2]], black);
+    const climate = probeOnCable([[LENGTH / 2 + 0.3, -0.5, 0], [LENGTH / 2 + 1.2, -0.8, -0.2], [LENGTH / 2 + 1.9, -1.4, 0.4], [LENGTH / 2 + 2.3, -2.0, 1.2]], black);
     climate.tip.add(mesh(new THREE.CylinderGeometry(0.26, 0.26, 0.9, 32), plastic, [0, 0.45, 0]));
     const filter = mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.5, 32), focusMaterials.climate, [0, 1.15, 0]);
     climate.tip.add(filter);
@@ -262,7 +266,7 @@ export function buildDevice() {
         root,
         parts: { bottom, gasket, lid, board, battery, led, charge },
         focusMaterials,
-        anchors: { gnss: patch, imu, sd, climate: filter, outside: outside.tip, lte: modem, lteAntenna, sim, battery: cell },
+        anchors: { gnss: patch, imu, sd, climate: filter, lte: modem, lteAntenna, sim, battery: cell },
     };
 }
 

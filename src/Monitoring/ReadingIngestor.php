@@ -61,7 +61,6 @@ class ReadingIngestor
             ->setPosition($input->latitude, $input->longitude)
             ->setTemperature($input->temperature)
             ->setHumidity($input->humidity)
-            ->setOutsideTemperature($input->outsideTemperature)
             ->setActivity($input->activity)
             ->setGait($input->gait)
             ->setRolls($input->rolls)

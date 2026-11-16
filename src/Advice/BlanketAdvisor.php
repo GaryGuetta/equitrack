@@ -43,17 +43,13 @@ class BlanketAdvisor
 
     public function advise(Horse $horse, ?Forecast $forecast, ?Reading $latest): ?BlanketAdvice
     {
-        $isFresh = null !== $latest && $latest->getRecordedAt() >= new \DateTimeImmutable(self::READING_MAX_AGE);
-
-        if (null !== $forecast) {
-            $temperature = $forecast->minTemperature;
-            $source = 'minimum prévu sur 12 h';
-        } elseif ($isFresh && null !== $latest->getOutsideTemperature()) {
-            $temperature = $latest->getOutsideTemperature();
-            $source = 'mesurée par le boîtier';
-        } else {
+        // Le boîtier ne mesure que sous la couverture : la température extérieure vient de la météo.
+        if (null === $forecast) {
             return null;
         }
+        $isFresh = null !== $latest && $latest->getRecordedAt() >= new \DateTimeImmutable(self::READING_MAX_AGE);
+        $temperature = $forecast->minTemperature;
+        $source = 'minimum prévu sur 12 h';
 
         $reasons = [];
         $rank = self::GRID[$horse->getClip()->value][$this->band($temperature)]->rank();

@@ -40,10 +40,6 @@ class Reading
     #[ORM\Column(nullable: true)]
     private ?float $humidity = null;
 
-    /** Température extérieure, °C (DS18B20). */
-    #[ORM\Column(nullable: true)]
-    private ?float $outsideTemperature = null;
-
     /** Indice d'activité 0–100 calculé par le boîtier à partir de l'IMU. */
     #[ORM\Column(nullable: true)]
     private ?float $activity = null;
@@ -125,18 +121,6 @@ class Reading
     public function setHumidity(?float $humidity): static
     {
         $this->humidity = $humidity;
-
-        return $this;
-    }
-
-    public function getOutsideTemperature(): ?float
-    {
-        return $this->outsideTemperature;
-    }
-
-    public function setOutsideTemperature(?float $outsideTemperature): static
-    {
-        $this->outsideTemperature = $outsideTemperature;
 
         return $this;
     }

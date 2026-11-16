@@ -9,7 +9,7 @@ const GLOW = {
     gnss: ['gnss'],
     imu: ['imu'],
     sd: ['sd'],
-    climate: ['climate', 'outside'],
+    climate: ['climate'],
     lte: ['lte', 'lteAntenna', 'sim'],
     battery: ['battery'],
 };
@@ -111,7 +111,7 @@ export default class extends Controller {
 
         const ground = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), new THREE.ShadowMaterial({ opacity: 0.16 }));
         ground.rotation.x = -Math.PI / 2;
-        // Assez bas pour ne jamais masquer les sondes du fond en vue éclatée.
+        // Assez bas pour ne jamais masquer la sonde du fond en vue éclatée.
         ground.position.y = -6.8;
         ground.receiveShadow = true;
         this.scene.add(ground);
@@ -200,8 +200,8 @@ export default class extends Controller {
         this.timeline.to(s, { yaw: 0.4, pitch: 0.7, camDistance: 32, lookY: 0.6 }, 3);
         focus('imu', 3.1);
         focus('sd', 3.1);
-        // 4 · climat : on tourne le côté des sondes vers nous (lacet négatif = extrémité droite en avant)
-        // Les sondes dépassent à droite : on décale le boîtier vers la gauche le temps du chapitre.
+        // 4 · climat : on tourne le côté de la sonde vers nous (lacet négatif = extrémité droite en avant)
+        // La sonde dépasse à droite : on décale le boîtier vers la gauche le temps du chapitre.
         this.timeline.to(s, { yaw: -0.45, pitch: 0.35, lookY: -1.4, camDistance: 35, offsetX: -3 }, 4);
         focus('climate', 4.1);
         // 5 · LTE-M : le modem, la carte SIM et l'antenne souple du couvercle

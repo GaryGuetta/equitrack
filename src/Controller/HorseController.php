@@ -167,11 +167,11 @@ final class HorseController extends AbstractController
         $response = new StreamedResponse(static function () use ($rows): void {
             $out = fopen('php://output', 'w');
             fwrite($out, "\xEF\xBB\xBF"); // BOM : Excel lit l'UTF-8 correctement
-            fputcsv($out, ['date', 'latitude', 'longitude', 'temp_couverture_c', 'humidite_pct', 'temp_exterieure_c', 'activite', 'allure', 'roulades', 'pouls_bpm', 'batterie_pct'], ';', '"', '');
+            fputcsv($out, ['date', 'latitude', 'longitude', 'temp_couverture_c', 'humidite_pct', 'activite', 'allure', 'roulades', 'pouls_bpm', 'batterie_pct'], ';', '"', '');
             foreach ($rows as $r) {
                 fputcsv($out, [
                     $r->getRecordedAt()->format('Y-m-d H:i:s'), $r->getLatitude(), $r->getLongitude(),
-                    $r->getTemperature(), $r->getHumidity(), $r->getOutsideTemperature(), $r->getActivity(),
+                    $r->getTemperature(), $r->getHumidity(), $r->getActivity(),
                     $r->getGait()?->label(), $r->getRolls(), $r->getHeartRate(), $r->getBattery(),
                 ], ';', '"', '');
             }

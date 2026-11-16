@@ -16,7 +16,7 @@ export default class extends Controller {
         this.trackLength = this.trackTarget.getTotalLength();
 
         if (reduceMotion()) {
-            gsap.set(this.horseTarget, { motionPath: { path: this.trackTarget, align: this.trackTarget, alignOrigin: [0.5, 0.5], end: 0.45 } });
+            this.walkTo(0.45);
             return;
         }
 
@@ -37,19 +37,14 @@ export default class extends Controller {
     play() {
         this.escaped = false;
         let gaitIndex = 0;
+        const walk = { progress: 0 };
 
         this.loop = gsap.timeline({ onComplete: () => this.restart() })
             .set(this.fenceTarget, { attr: { class: 'fence' } })
             .set(this.horseTarget, { attr: { class: 'horse' } })
             .set(this.toastTarget, { autoAlpha: 0, y: 16 })
             .add(() => this.setStatus(false))
-            .fromTo(this.trackTarget, { drawSVG: 0 }, { drawSVG: '100%', duration: 16, ease: 'none' }, 0)
-            .to(this.horseTarget, {
-                motionPath: { path: this.trackTarget, align: this.trackTarget, alignOrigin: [0.5, 0.5] },
-                duration: 16,
-                ease: 'none',
-                onUpdate: () => this.onMove(),
-            }, 0)
+            .fromTo(walk, { progress: 0 }, { progress: 1, duration: 16, ease: 'none', onUpdate: () => this.walkTo(walk.progress) }, 0)
             .to({}, { duration: 3.5 });
 
         // Les mesures « arrivent » toutes les 2 s, comme un lot du boîtier.
@@ -64,22 +59,20 @@ export default class extends Controller {
             duration: 0.6,
             onComplete: () => {
                 gsap.set([this.trackTarget, this.horseTarget], { autoAlpha: 1 });
+                this.walkTo(0);
                 this.play();
             },
         });
     }
 
-    onMove() {
-        if (this.escaped) {
-            return;
-        }
-        const box = this.horseTarget.getBBox();
-        const matrix = this.horseTarget.transform.baseVal.consolidate()?.matrix;
-        if (!matrix) {
-            return;
-        }
-        const point = new DOMPoint(matrix.e + box.x + box.width / 2, matrix.f + box.y + box.height / 2);
-        if (!this.fenceTarget.isPointInFill(point)) {
+    /** Trait et point partent de la même longueur : le point reste toujours au bout du trajet. */
+    walkTo(progress) {
+        const length = this.trackLength * progress;
+        const point = this.trackTarget.getPointAtLength(length);
+        this.trackTarget.style.strokeDasharray = `${length} ${this.trackLength}`;
+        this.horseTarget.setAttribute('transform', `translate(${point.x} ${point.y})`);
+
+        if (!this.escaped && progress > 0 && !this.fenceTarget.isPointInFill(new DOMPoint(point.x, point.y))) {
             this.escape();
         }
     }

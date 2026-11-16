@@ -51,7 +51,7 @@
                     {{ latest and latest.humidity is not null ? latest.humidity|round : '—' }}<small>% HR</small>
                 </span>
                 <span class="stat-sub">
-                    {% if latest and latest.outsideTemperature is not null %}Extérieur {{ latest.outsideTemperature|number_format(1, ',') }} °C{% else %}&nbsp;{% endif %}
+                    {% if forecast %}Dehors {{ forecast.currentTemperature|round }} °C (météo){% else %}&nbsp;{% endif %}
                 </span>
             </div>
         </div>
@@ -130,7 +130,7 @@
                         </ul>
                         <p class="fine">Repères indicatifs, à adapter à votre cheval. En cas de doute, demandez conseil à un professionnel.</p>
                     {% else %}
-                        <p>Pas assez d'informations : il faut une position (enclos ou boîtier) pour la météo, ou une mesure récente de la température extérieure.</p>
+                        <p>Pas assez d'informations : il faut une position (enclos ou boîtier) pour connaître la météo.</p>
                     {% endif %}
                 </section>
 

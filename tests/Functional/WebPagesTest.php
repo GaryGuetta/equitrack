@@ -34,7 +34,7 @@ final class WebPagesTest extends WebTestCase
         foreach (['-30 minutes', '-20 minutes', '-10 minutes'] as $i => $when) {
             $reading = (new Reading($this->horse, new \DateTimeImmutable($when)))
                 ->setPosition(44.0225, 1.3527 + $i * 0.0003)
-                ->setTemperature(28.0)->setHumidity(60.0)->setOutsideTemperature(6.0)
+                ->setTemperature(28.0)->setHumidity(60.0)
                 ->setActivity(25.0)->setGait(Gait::Walk);
             $this->em->persist($reading);
         }
@@ -82,8 +82,8 @@ final class WebPagesTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h1', 'Tornade');
         self::assertSelectorTextContains('.grid-4', 'Dans l\'enclos');
-        // Météo désactivée en test : le conseil repose sur la température extérieure mesurée.
-        self::assertSelectorTextContains('.advice', 'mesurée par le boîtier');
+        // Météo désactivée en test : sans prévision, pas de conseil.
+        self::assertSelectorTextContains('.advice', 'Pas assez d\'informations');
 
         $this->client->request('GET', '/chevaux/'.$this->horse->getId().'?periode=7j');
         self::assertResponseIsSuccessful();

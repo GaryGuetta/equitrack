@@ -59,15 +59,12 @@ final class BlanketAdvisorTest extends TestCase
         self::assertSame('lighter', $advice->verdict());
     }
 
-    public function testFallsBackOnMeasuredOutsideTemperature(): void
+    public function testNoAdviceWithoutForecastEvenWithReading(): void
     {
         $horse = $this->horse(Clip::Full);
-        $reading = (new Reading($horse, new \DateTimeImmutable('-5 minutes')))->setOutsideTemperature(2.0);
+        $reading = (new Reading($horse, new \DateTimeImmutable('-5 minutes')))->setTemperature(27.0);
 
-        $advice = new BlanketAdvisor()->advise($horse, null, $reading);
-
-        self::assertSame(BlanketWeight::Heavy, $advice->recommended);
-        self::assertSame('mesurée par le boîtier', $advice->temperatureSource);
+        self::assertNull(new BlanketAdvisor()->advise($horse, null, $reading));
     }
 
     public function testNoAdviceWithoutAnyTemperature(): void

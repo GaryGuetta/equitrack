@@ -9,7 +9,6 @@ Chart.defaults.color = '#5E6B64';
 const DATASETS = {
     climate: [
         { key: 'temperature', label: 'Sous la couverture (°C)', color: '#1E3A2F', axis: 'y' },
-        { key: 'outside', label: 'Extérieur (°C)', color: '#8DB89F', axis: 'y', dash: [5, 4] },
         { key: 'humidity', label: 'Humidité (%)', color: '#31617F', axis: 'y1' },
     ],
     activity: [

@@ -106,7 +106,6 @@ final class ApiReadingTest extends WebTestCase
             'longitude' => 1.3527,
             'temperature' => 27.5,
             'humidity' => 60.0,
-            'outsideTemperature' => 8.0,
             'activity' => 22.0,
             'gait' => 'pas',
             'rolls' => 0,

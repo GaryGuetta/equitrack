@@ -80,10 +80,10 @@ class HorseSimulator
                 $position = $this->outside($paddock, 25 + 15 * max(0, $i - $total + 4));
             }
 
-            $outside = 7 + 5 * sin(($hour - 9) / 24 * 2 * M_PI) + $dayOffsets[$day] + $this->gauss(0, 0.3);
+            $ambient = 7 + 5 * sin(($hour - 9) / 24 * 2 * M_PI) + $dayOffsets[$day] + $this->gauss(0, 0.3);
             [$activityMean, $activitySd] = self::ACTIVITY[$gait->value];
             $activity = $this->clamp($this->gauss($activityMean, $activitySd), 0, 100);
-            $under = 26 + 0.3 * ($outside - 7) + $activity * 0.04 + $this->gauss(0, 0.4);
+            $under = 26 + 0.3 * ($ambient - 7) + $activity * 0.04 + $this->gauss(0, 0.4);
             $humidity = 56 + $activity * 0.12 + $this->gauss(0, 3);
             if ($isLast && 'transpiration' === $scenario) {
                 $under += 8;
@@ -96,7 +96,6 @@ class HorseSimulator
                 longitude: round($position[1] + $this->gauss(0, 0.00001), 6),
                 temperature: round($under, 1),
                 humidity: round($this->clamp($humidity, 20, 100), 1),
-                outsideTemperature: round($outside, 1),
                 activity: round($activity, 1),
                 gait: $gait,
                 rolls: $rolls,

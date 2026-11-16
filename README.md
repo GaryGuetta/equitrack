@@ -53,7 +53,6 @@ Content-Type: application/json
       "latitude": 44.0560, "longitude": 1.4285,
       "temperature": 27.8,        // °C sous la couverture (sonde SHT35)
       "humidity": 61,             // % HR sous la couverture
-      "outsideTemperature": 9.5,  // °C extérieur (DS18B20)
       "activity": 24,             // indice 0–100 calculé par le boîtier
       "gait": "pas",              // couche | repos | pas | trot | galop
       "rolls": 0,                 // roulades sur l'intervalle

@@ -21,8 +21,6 @@ final readonly class ReadingInput
         public ?float $temperature = null,
         #[Assert\Range(min: 0, max: 100)]
         public ?float $humidity = null,
-        #[Assert\Range(min: -40, max: 60)]
-        public ?float $outsideTemperature = null,
         #[Assert\Range(min: 0, max: 100)]
         public ?float $activity = null,
         public ?Gait $gait = null,
