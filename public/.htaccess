@@ -1,0 +1,13 @@
+# Apache (alwaysdata) : envoie toutes les URL vers Symfony, sauf les fichiers qui existent (CSS, JS, images).
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Transmet l'en-tête « Authorization: Bearer <jeton> » des boîtiers à PHP (sinon Apache le supprime).
+    RewriteCond %{HTTP:Authorization} .+
+    RewriteRule ^ - [E=HTTP_AUTHORIZATION:%0]
+
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [QSA,L]
+</IfModule>
